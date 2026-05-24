@@ -533,7 +533,11 @@ def main() -> int:
                     txns = parse_alert_email(email)
 
                 if not txns:
-                    log.debug(f"No transactions parsed from email: {email.get('subject', '')}")
+                    log.info(
+                        f"No transaction matched — from: {email.get('from','')[:50]}  "
+                        f"subject: {email.get('subject','')[:80]}  "
+                        f"snippet: {email.get('snippet','')[:120]}"
+                    )
 
                 new_transactions.extend(txns)
 

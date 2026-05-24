@@ -49,31 +49,18 @@ TOKEN_PATH = REPO_ROOT / "token.json"
 GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 
 # ─── Sender filters ───────────────────────────────────────────────────────────
-# Emails from these senders will be fetched and parsed.
-ALLOWED_SENDERS = [
-    # HDFC Bank alerts and statements
-    "alerts@hdfcbank.net",
-    "alerts@hdfcbank.com",
-    "statement@hdfcbank.com",
-
-    # ICICI Bank alerts and statements
-    "alerts@icicibank.com",
-    "auto_noreply@icicibank.com",
-    "icicibank@icicibank.com",
-
-    # SBI Credit Card
-    "customercare@sbicard.com",
-    "noreply@sbicard.com",
-    "statements@sbicard.com",
-
-    # ICICI Credit Card
-    "icicicredit@icicibank.com",
-    "ccalerts@icicibank.com",
+# Use domain-based matching so ALL addresses at each bank domain are captured,
+# not just the handful of specific addresses we happen to know about.
+# Indian banks send from many different local-parts (alerts@, noreply@,
+# hdfcbanksmsmobile@, notify@, etc.) — exact-address lists always miss some.
+BANK_DOMAINS = [
+    "hdfcbank.net",   # HDFC alerts, statements
+    "hdfcbank.com",   # HDFC alternate domain
+    "icicibank.com",  # ICICI savings + CC alerts + statements
+    "sbicard.com",    # SBI Credit Card
 ]
 
-# Build a Gmail query from sender list
-SENDER_QUERY = " OR ".join(f"from:{s}" for s in ALLOWED_SENDERS)
-FULL_QUERY = f"({SENDER_QUERY})"
+FULL_QUERY = "(" + " OR ".join(f"from:{d}" for d in BANK_DOMAINS) + ")"
 
 
 # ─── OAuth2 credential helpers ────────────────────────────────────────────────
