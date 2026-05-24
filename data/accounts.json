@@ -3,8 +3,9 @@
     {
       "id": "HDFC",
       "name": "HDFC Savings Account",
-      "balance": 0.0,
-      "as_of": "2026-05-24",
+      "account_number_last4": "6961",
+      "balance": 54109.20,
+      "as_of": "2026-05-12",
       "this_month_credit": 0.0,
       "this_month_debit": 0.0,
       "last_month_credit": 0.0,
@@ -23,7 +24,7 @@
           "net": 0.0
         },
         {
-          "month": "2026-01",
+          "month": "2026-02",
           "credit": 0.0,
           "debit": 0.0,
           "net": 0.0
@@ -52,8 +53,9 @@
     {
       "id": "ICICI",
       "name": "ICICI Savings Account",
-      "balance": 0.0,
-      "as_of": "2026-05-24",
+      "account_number_last4": "7056",
+      "balance": 19056.88,
+      "as_of": "2026-04-29",
       "this_month_credit": 0.0,
       "this_month_debit": 0.0,
       "last_month_credit": 0.0,
@@ -72,7 +74,7 @@
           "net": 0.0
         },
         {
-          "month": "2026-01",
+          "month": "2026-02",
           "credit": 0.0,
           "debit": 0.0,
           "net": 0.0
