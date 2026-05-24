@@ -1,0 +1,109 @@
+{
+  "cards": [
+    {
+      "id": "SBI_CC",
+      "name": "SBI SimplyCLICK Credit Card",
+      "bank": "SBI",
+      "credit_limit": 200000,
+      "outstanding": 56039.62,
+      "minimum_due": 2801.98,
+      "total_due": 56039.62,
+      "due_date": "2026-06-05",
+      "statement_date": "2026-05-06",
+      "this_cycle_spend": 56039.62,
+      "last_cycle_spend": 66400.71,
+      "utilization_pct": 28.0,
+      "monthly_spend": [
+        {
+          "month": "2025-12",
+          "credit": 0.0,
+          "debit": 0,
+          "net": 0
+        },
+        {
+          "month": "2026-01",
+          "credit": 0.0,
+          "debit": 0,
+          "net": 0
+        },
+        {
+          "month": "2026-02",
+          "credit": 0.0,
+          "debit": 0,
+          "net": 0
+        },
+        {
+          "month": "2026-03",
+          "credit": 0.0,
+          "debit": 18312.82,
+          "net": -18312.82
+        },
+        {
+          "month": "2026-04",
+          "credit": 0.0,
+          "debit": 66400.71,
+          "net": -66400.71
+        },
+        {
+          "month": "2026-05",
+          "credit": 0.0,
+          "debit": 56039.62,
+          "net": -56039.62
+        }
+      ]
+    },
+    {
+      "id": "ICICI_CC",
+      "name": "ICICI Amazon Pay Credit Card",
+      "bank": "ICICI",
+      "credit_limit": 150000,
+      "outstanding": 45833.99,
+      "minimum_due": 2291.7,
+      "total_due": 45833.99,
+      "due_date": "2026-05-31",
+      "statement_date": "2026-05-01",
+      "this_cycle_spend": 45833.99,
+      "last_cycle_spend": 49927.7,
+      "utilization_pct": 30.6,
+      "monthly_spend": [
+        {
+          "month": "2025-12",
+          "credit": 0.0,
+          "debit": 0,
+          "net": 0
+        },
+        {
+          "month": "2026-01",
+          "credit": 0.0,
+          "debit": 0,
+          "net": 0
+        },
+        {
+          "month": "2026-02",
+          "credit": 0.0,
+          "debit": 0,
+          "net": 0
+        },
+        {
+          "month": "2026-03",
+          "credit": 0.0,
+          "debit": 13175.4,
+          "net": -13175.4
+        },
+        {
+          "month": "2026-04",
+          "credit": 0.0,
+          "debit": 49927.7,
+          "net": -49927.7
+        },
+        {
+          "month": "2026-05",
+          "credit": 0.0,
+          "debit": 45833.99,
+          "net": -45833.99
+        }
+      ]
+    }
+  ],
+  "last_updated": "2026-05-24"
+}

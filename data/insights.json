@@ -1,0 +1,200 @@
+{
+  "generated_at": "2026-05-24",
+  "alerts": [
+    {
+      "type": "unused_subscription",
+      "title": "Recurring charge: LinkedIn Premium",
+      "description": "Rs.1,699/month detected as a regular subscription.",
+      "estimated_saving": 1699
+    },
+    {
+      "type": "unused_subscription",
+      "title": "Recurring charge: ChatGPT Plus",
+      "description": "Rs.1,699/month detected as a regular subscription.",
+      "estimated_saving": 1699
+    }
+  ],
+  "subscriptions": [
+    {
+      "name": "Zomato",
+      "amount": 4395.15,
+      "frequency": "monthly",
+      "last_charged": "2026-05-24",
+      "category": "Food & Dining"
+    },
+    {
+      "name": "LinkedIn Premium",
+      "amount": 1699.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-18",
+      "category": "Subscriptions"
+    },
+    {
+      "name": "ChatGPT Plus",
+      "amount": 1699.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-05",
+      "category": "Subscriptions"
+    },
+    {
+      "name": "INOX",
+      "amount": 3694.19,
+      "frequency": "monthly",
+      "last_charged": "2026-05-09",
+      "category": "Entertainment"
+    },
+    {
+      "name": "Self Transfer",
+      "amount": 30000.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-01",
+      "category": "Transfers"
+    }
+  ],
+  "tips": [
+    "Top 3 merchants this month: Croma, ATM, Amazon. Consider setting per-merchant monthly budgets.",
+    "Detected Rs.41,487/month in recurring subscriptions. Review each for active usage."
+  ],
+  "category_insights": [
+    {
+      "category": "Entertainment",
+      "this_month": 10081.07,
+      "last_month": 10864.23,
+      "avg_3m": 9304.88,
+      "change_pct": -7.2
+    },
+    {
+      "category": "Food & Dining",
+      "this_month": 27256.18,
+      "last_month": 34367.09,
+      "avg_3m": 30174.18,
+      "change_pct": -20.7
+    },
+    {
+      "category": "Health & Fitness",
+      "this_month": 20989.98,
+      "last_month": 19455.16,
+      "avg_3m": 18165.54,
+      "change_pct": 7.9
+    },
+    {
+      "category": "Others",
+      "this_month": 47000.0,
+      "last_month": 51000.0,
+      "avg_3m": 40333.33,
+      "change_pct": -7.8
+    },
+    {
+      "category": "Shopping",
+      "this_month": 135546.53,
+      "last_month": 207957.35,
+      "avg_3m": 157054.28,
+      "change_pct": -34.8
+    },
+    {
+      "category": "Subscriptions",
+      "this_month": 6209.0,
+      "last_month": 6209.0,
+      "avg_3m": 5790.33,
+      "change_pct": 0.0
+    },
+    {
+      "category": "Transfers",
+      "this_month": 30000.0,
+      "last_month": 30000.0,
+      "avg_3m": 30000.0,
+      "change_pct": 0.0
+    },
+    {
+      "category": "Transport",
+      "this_month": 18280.69,
+      "last_month": 23767.02,
+      "avg_3m": 19599.25,
+      "change_pct": -23.1
+    },
+    {
+      "category": "Utilities",
+      "this_month": 5780.98,
+      "last_month": 9858.14,
+      "avg_3m": 7077.86,
+      "change_pct": -41.4
+    }
+  ],
+  "top_merchants": [
+    {
+      "merchant": "Croma",
+      "total": 48762.28,
+      "count": 3
+    },
+    {
+      "merchant": "ATM",
+      "total": 47000.0,
+      "count": 7
+    },
+    {
+      "merchant": "Amazon",
+      "total": 35592.92,
+      "count": 10
+    },
+    {
+      "merchant": "Self Transfer",
+      "total": 30000.0,
+      "count": 1
+    },
+    {
+      "merchant": "Flipkart",
+      "total": 18207.95,
+      "count": 6
+    },
+    {
+      "merchant": "IKEA",
+      "total": 14898.56,
+      "count": 1
+    },
+    {
+      "merchant": "IndiGo Airlines",
+      "total": 11563.33,
+      "count": 1
+    },
+    {
+      "merchant": "Apollo Pharmacy",
+      "total": 10974.38,
+      "count": 10
+    },
+    {
+      "merchant": "Myntra",
+      "total": 8420.77,
+      "count": 4
+    },
+    {
+      "merchant": "Swiggy",
+      "total": 7538.62,
+      "count": 15
+    },
+    {
+      "merchant": "Meesho",
+      "total": 5573.13,
+      "count": 6
+    },
+    {
+      "merchant": "MedPlus",
+      "total": 5040.78,
+      "count": 6
+    },
+    {
+      "merchant": "Cult.fit",
+      "total": 4974.82,
+      "count": 4
+    },
+    {
+      "merchant": "Blinkit",
+      "total": 4971.81,
+      "count": 7
+    },
+    {
+      "merchant": "BookMyShow",
+      "total": 4636.37,
+      "count": 6
+    }
+  ]
+}
