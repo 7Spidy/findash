@@ -150,17 +150,19 @@ def parse_alert_email(email: dict) -> list[dict]:
     full_text = snippet + " " + " ".join(text_parts)
     full_text = " ".join(full_text.split())  # normalise whitespace
 
-    # Determine account from sender
+    # Determine account from sender.
+    # Note: matches both legacy domains (icicibank.com) and the new
+    # RBI-mandated .bank.in domains (hdfcbank.bank.in, icici.bank.in).
     if "hdfc" in sender:
         account = "HDFC"
         debit_pat, credit_pat = _HDFC_DEBIT, _HDFC_CREDIT
-    elif "icicibank.com" in sender and "credit" not in sender and "cc" not in sender:
+    elif "icici" in sender and "credit" not in sender and "cc" not in sender:
         account = "ICICI"
         debit_pat, credit_pat = _ICICI_DEBIT, _ICICI_CREDIT
-    elif "icicibank.com" in sender:
+    elif "icici" in sender:
         account = "ICICI_CC"
         debit_pat, credit_pat = _ICICI_DEBIT, _ICICI_CREDIT
-    elif "sbicard" in sender:
+    elif "sbicard" in sender or "sbi" in sender:
         account = "SBI_CC"
         debit_pat, credit_pat = _HDFC_DEBIT, _HDFC_CREDIT
     else:

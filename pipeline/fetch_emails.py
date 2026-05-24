@@ -54,6 +54,12 @@ GMAIL_SCOPES = ["https://www.googleapis.com/auth/gmail.readonly"]
 # Indian banks send from many different local-parts (alerts@, noreply@,
 # hdfcbanksmsmobile@, notify@, etc.) — exact-address lists always miss some.
 BANK_DOMAINS = [
+    # New RBI-mandated .bank.in domains — these carry the actual
+    # transaction alerts (confirmed from the user's inbox).
+    "hdfcbank.bank.in",  # HDFC transaction alerts (alerts@hdfcbank.bank.in)
+    "icici.bank.in",     # ICICI transaction alerts (alert@icici.bank.in)
+
+    # Legacy domains — still used for statements, CC mailers, OTPs, etc.
     "hdfcbank.net",   # HDFC alerts, statements
     "hdfcbank.com",   # HDFC alternate domain
     "icicibank.com",  # ICICI savings + CC alerts + statements
@@ -280,15 +286,16 @@ def fetch_emails(service, since_epoch: str) -> list[dict]:
 
 
 def _bank_tag(sender: str) -> str:
-    """Derive a short bank identifier from a sender email address."""
+    """Derive a short bank identifier from a sender email address.
+    Matches both legacy domains and the new .bank.in domains."""
     s = sender.lower()
     if "sbicard" in s:
         return "sbi_cc"
     if "icicicredit" in s or "ccalerts" in s:
         return "icici_cc"
-    if "icicibank" in s:
+    if "icici" in s:
         return "icici"
-    if "hdfcbank" in s:
+    if "hdfc" in s:
         return "hdfc"
     return "unknown"
 
