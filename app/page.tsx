@@ -1,5 +1,5 @@
 import { getAccountsData, getCreditCardsData, getInsightsData, getLastUpdated, getTransactions } from "@/lib/server-data";
-import { formatINR, deltaArrow } from "@/lib/data";
+import { formatINR, deltaArrow, buildMonthlyFlow } from "@/lib/data";
 import DashboardShell from "@/components/DashboardShell";
 import GlassCard, { StatCard } from "@/components/GlassCard";
 import CashflowChart from "@/components/CashflowChart";
@@ -24,18 +24,24 @@ export default function OverviewPage() {
   const transactions = getTransactions();
 
   const totalBalance = accounts.accounts.reduce((s, a) => s + a.balance, 0);
-  const totalIn      = accounts.accounts.reduce((s, a) => s + a.this_month_credit, 0);
-  const totalOut     = accounts.accounts.reduce((s, a) => s + a.this_month_debit, 0);
-  const totalLastIn  = accounts.accounts.reduce((s, a) => s + a.last_month_credit, 0);
-  const totalLastOut = accounts.accounts.reduce((s, a) => s + a.last_month_debit, 0);
   const totalCCSpend = cards.cards.reduce((s, c) => s + c.this_cycle_spend, 0);
+
+  // Derive MTD and last-month totals from transactions (pipeline only writes transactions.json)
+  const thisMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
+  const lastMonthDate = new Date();
+  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+  const lastMonth = lastMonthDate.toISOString().slice(0, 7);
+
+  const totalIn      = transactions.filter(t => t.type === "credit" && t.date.startsWith(thisMonth)).reduce((s, t) => s + t.amount, 0);
+  const totalOut     = transactions.filter(t => t.type === "debit"  && t.date.startsWith(thisMonth)).reduce((s, t) => s + t.amount, 0);
+  const totalLastIn  = transactions.filter(t => t.type === "credit" && t.date.startsWith(lastMonth)).reduce((s, t) => s + t.amount, 0);
+  const totalLastOut = transactions.filter(t => t.type === "debit"  && t.date.startsWith(lastMonth)).reduce((s, t) => s + t.amount, 0);
 
   const inDelta  = totalLastIn  > 0 ? ((totalIn  - totalLastIn)  / totalLastIn  * 100) : 0;
   const outDelta = totalLastOut > 0 ? ((totalOut - totalLastOut) / totalLastOut * 100) : 0;
 
-  const primaryFlow = accounts.accounts.find((a) => a.id === "HDFC")?.monthly_flow ?? [];
-
-  const thisMonth = new Date().toISOString().slice(0, 7);
+  // Cashflow chart — aggregate HDFC transactions by month
+  const primaryFlow = buildMonthlyFlow(transactions.filter(t => t.account === "HDFC"));
   const categoryMap: Record<string, number> = {};
   transactions
     .filter((t) => t.type === "debit" && t.date.startsWith(thisMonth))

@@ -1,5 +1,5 @@
 import { getAccountsData, getTransactions, getLastUpdated } from "@/lib/server-data";
-import { formatINR } from "@/lib/data";
+import { formatINR, buildMonthlyFlow } from "@/lib/data";
 import DashboardShell from "@/components/DashboardShell";
 import GlassCard, { StatCard } from "@/components/GlassCard";
 import CashflowChart from "@/components/CashflowChart";
@@ -12,6 +12,12 @@ export default function AccountsPage() {
   const transactions = getTransactions();
   const lastUpdated  = getLastUpdated();
 
+  // Derive MTD per account from transactions (pipeline only writes transactions.json)
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const lastMonthDate = new Date();
+  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
+  const lastMonth = lastMonthDate.toISOString().slice(0, 7);
+
   return (
     <DashboardShell lastUpdated={lastUpdated.timestamp}>
       <div className="mb-8">
@@ -20,10 +26,15 @@ export default function AccountsPage() {
       </div>
 
       {accounts.accounts.map((acct, acctIdx) => {
-        const acctTxns = transactions.filter((t) => t.account === acct.id);
-        const inDelta  = acct.last_month_credit > 0 ? ((acct.this_month_credit - acct.last_month_credit) / acct.last_month_credit * 100) : 0;
-        const outDelta = acct.last_month_debit  > 0 ? ((acct.this_month_debit  - acct.last_month_debit)  / acct.last_month_debit  * 100) : 0;
-        const net = acct.this_month_credit - acct.this_month_debit;
+        const acctTxns   = transactions.filter((t) => t.account === acct.id);
+        const thisCredit = acctTxns.filter(t => t.type === "credit" && t.date.startsWith(thisMonth)).reduce((s, t) => s + t.amount, 0);
+        const thisDebit  = acctTxns.filter(t => t.type === "debit"  && t.date.startsWith(thisMonth)).reduce((s, t) => s + t.amount, 0);
+        const lastCredit = acctTxns.filter(t => t.type === "credit" && t.date.startsWith(lastMonth)).reduce((s, t) => s + t.amount, 0);
+        const lastDebit  = acctTxns.filter(t => t.type === "debit"  && t.date.startsWith(lastMonth)).reduce((s, t) => s + t.amount, 0);
+        const inDelta    = lastCredit > 0 ? ((thisCredit - lastCredit) / lastCredit * 100) : 0;
+        const outDelta   = lastDebit  > 0 ? ((thisDebit  - lastDebit)  / lastDebit  * 100) : 0;
+        const net        = thisCredit - thisDebit;
+        const monthlyFlow = buildMonthlyFlow(acctTxns);
 
         return (
           <section key={acct.id} className="mb-12">
@@ -42,10 +53,10 @@ export default function AccountsPage() {
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <StatCard label="In This Month"  value={formatINR(acct.this_month_credit, true)}
+              <StatCard label="In This Month"  value={formatINR(thisCredit, true)}
                 sub={`${inDelta >= 0 ? "↑" : "↓"} ${Math.abs(inDelta).toFixed(1)}% vs last`}
                 subColor={inDelta >= 0 ? "sage" : "rose"} delay={acctIdx * 0.1} />
-              <StatCard label="Out This Month" value={formatINR(acct.this_month_debit, true)}
+              <StatCard label="Out This Month" value={formatINR(thisDebit, true)}
                 sub={`${outDelta >= 0 ? "↑" : "↓"} ${Math.abs(outDelta).toFixed(1)}% vs last`}
                 subColor={outDelta <= 0 ? "sage" : "rose"} delay={acctIdx * 0.1 + 0.06} />
               <StatCard label="Net Cashflow" value={formatINR(Math.abs(net), true)}
@@ -56,7 +67,7 @@ export default function AccountsPage() {
             </div>
 
             <GlassCard delay={acctIdx * 0.1 + 0.24} className="mb-6">
-              <CashflowChart data={acct.monthly_flow} title="Monthly Cashflow" />
+              <CashflowChart data={monthlyFlow} title="Monthly Cashflow" />
             </GlassCard>
 
             <GlassCard delay={acctIdx * 0.1 + 0.30} hover={false}>
