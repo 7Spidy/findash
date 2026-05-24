@@ -3,98 +3,100 @@
     {
       "id": "HDFC",
       "name": "HDFC Savings Account",
-      "balance": 142650.0,
+      "balance": 0.0,
       "as_of": "2026-05-24",
-      "this_month_credit": 85000.0,
-      "this_month_debit": 132215.81,
-      "last_month_credit": 85000.0,
-      "last_month_debit": 162391.26,
+      "this_month_credit": 0.0,
+      "this_month_debit": 0.0,
+      "last_month_credit": 0.0,
+      "last_month_debit": 0.0,
       "monthly_flow": [
         {
-          "month": "2026-02",
+          "month": "2025-12",
           "credit": 0.0,
-          "debit": 5686.28,
-          "net": -5686.28
+          "debit": 0.0,
+          "net": 0.0
+        },
+        {
+          "month": "2026-01",
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
+        },
+        {
+          "month": "2026-01",
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         },
         {
           "month": "2026-03",
-          "credit": 85000.0,
-          "debit": 157095.86,
-          "net": -72095.86
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         },
         {
           "month": "2026-04",
-          "credit": 85000.0,
-          "debit": 162391.26,
-          "net": -77391.26
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         },
         {
           "month": "2026-05",
-          "credit": 85000.0,
-          "debit": 132215.81,
-          "net": -47215.81
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         }
       ],
-      "recent_transactions": [
-        "dc120001883f245d",
-        "50947a8a44454b0f",
-        "0c00084181cb15ad",
-        "d317bc9ed5cf03fb",
-        "ea1fb88f1c775307",
-        "fab4a28d3d8226b8",
-        "a42171c04a9757cd",
-        "c6a264d4e97d2633",
-        "8f5a541fa61a8a04",
-        "c8b8a93078614b93"
-      ]
+      "recent_transactions": []
     },
     {
       "id": "ICICI",
       "name": "ICICI Savings Account",
-      "balance": 38420.0,
+      "balance": 0.0,
       "as_of": "2026-05-24",
-      "this_month_credit": 30000.0,
-      "this_month_debit": 67055.01,
-      "last_month_credit": 30000.0,
-      "last_month_debit": 114758.32,
+      "this_month_credit": 0.0,
+      "this_month_debit": 0.0,
+      "last_month_credit": 0.0,
+      "last_month_debit": 0.0,
       "monthly_flow": [
         {
-          "month": "2026-02",
+          "month": "2025-12",
           "credit": 0.0,
-          "debit": 13919.09,
-          "net": -13919.09
+          "debit": 0.0,
+          "net": 0.0
+        },
+        {
+          "month": "2026-01",
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
+        },
+        {
+          "month": "2026-01",
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         },
         {
           "month": "2026-03",
-          "credit": 30000.0,
-          "debit": 69292.44,
-          "net": -39292.44
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         },
         {
           "month": "2026-04",
-          "credit": 30000.0,
-          "debit": 114758.32,
-          "net": -84758.32
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         },
         {
           "month": "2026-05",
-          "credit": 30000.0,
-          "debit": 67055.01,
-          "net": -37055.01
+          "credit": 0.0,
+          "debit": 0.0,
+          "net": 0.0
         }
       ],
-      "recent_transactions": [
-        "5211b422c8810aeb",
-        "3245574e33faa000",
-        "a06e0fa9660fc8ce",
-        "03f6537516f46a4f",
-        "277867a4d94c6447",
-        "44f717a845288a41",
-        "4226b560d33a3ec7",
-        "fd1c7eae52ad8b11",
-        "1b86a36400b117ad",
-        "f5a4fd40a59bc98a"
-      ]
+      "recent_transactions": []
     }
   ],
   "last_updated": "2026-05-24"
