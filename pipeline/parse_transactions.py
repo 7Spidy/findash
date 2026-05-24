@@ -91,112 +91,330 @@ def build_transaction(
     }
 
 
+# ─── HTML stripping utility ───────────────────────────────────────────────────
+
+def _strip_html(html: str) -> str:
+    """Strip HTML tags and decode common entities, returning plain text."""
+    # Remove <script> and <style> blocks entirely
+    html = re.sub(r'<(?:script|style)[^>]*>.*?</(?:script|style)>', ' ',
+                  html, flags=re.DOTALL | re.IGNORECASE)
+    # Replace block-level tags with newlines so sentences don't run together
+    html = re.sub(r'<(?:br|p|div|tr|td|li)[^>]*>', ' ', html, flags=re.IGNORECASE)
+    # Remove all remaining tags
+    html = re.sub(r'<[^>]+>', '', html)
+    # Decode common HTML entities
+    for ent, ch in (('&nbsp;', ' '), ('&amp;', '&'), ('&lt;', '<'),
+                    ('&gt;', '>'), ('&#39;', "'"), ('&quot;', '"')):
+        html = html.replace(ent, ch)
+    return ' '.join(html.split())
+
+
 # ─── Alert email parsers ──────────────────────────────────────────────────────
-# HDFC alert format example:
-#   "Rs.1,250.00 debited from a/c **1234 on 14-05-26. Info: UPI-SWIGGY"
-#   "Rs 500.00 credited to a/c **5678 on 14/05/2026. Info: NEFT-EMPLOYER"
+#
+# Each bank sends a distinct alert format.  Patterns are derived from real
+# emails read directly from the inbox — NOT guessed.
+#
+# HDFC (alerts@hdfcbank.bank.in)
+# ─────────────────────────────
+# Format A – UPI / VPA transfer:
+#   "Rs.900.00 is debited from your account ending 6961 towards VPA
+#    findsuvi@okaxis (SUVRADIP TAPAS CHOUDHURI) on 24-05-26."
+#
+# Format B – Account-to-account (IMPS/internal):
+#   "Rs.42500.00 has been debited from account 6961 to account *9517
+#    on 16-05-26."
+#
+# Format C – ATM withdrawal:
+#   "Thank you for using your HDFC Bank Debit Card ending 2472 for ATM
+#    withdrawal for Rs 10000.00 in MUMBAI at SUPREME CHAMBERS on 12-05-2026"
+#
+# ICICI CC (credit_cards@icici.bank.in, credit_cards@icicibank.com)
+# ─────────────────────────────────────────────────────────────────
+# Format D – CC spend:
+#   "Your ICICI Bank Credit Card XX8014 has been used for a transaction of
+#    INR 100.00 on May 24, 2026 at 09:50:29. Info: URBANCLAP TECHNOLOGIES IN."
+#
+# Format E – CC payment received (credit):
+#   "We have received payment of INR 32263.11 on your ICICI Bank Credit Card
+#    account 4315 XXXX XXXX 8014 on 29-Mar-2026."
+#
+# ICICI Savings (alert@icici.bank.in, customernotification@icici.bank.in)
+# ────────────────────────────────────────────────────────────────────────
+# Format F – ATM/debit card withdrawal:
+#   "Cash Withdrawal of Rs. 5,000.00 has been made at an ATM using your
+#    Debit Card linked to Account XX056 on 29-Apr-26. Info: ATM*S1CNR603*CA."
+#
+# Format G – NEFT / IMPS outward:
+#   "You have made an online NEFT payment of Rs. 16,844.00 towards
+#    SHANTI DHAM CHS LTD on May 16, 2026 at 02:12 p.m."
+#
+# SBI CC (onlinesbicard@sbicard.com)
+# ───────────────────────────────────
+# Format H – CC spend:
+#   "Rs.634.98 spent on your SBI Credit Card ending 5946 at ZOMATO on 23/05/26."
 
-_HDFC_DEBIT = re.compile(
-    r"(?:Rs\.?\s*|INR\s*|₹\s*)([\d,]+(?:\.\d{1,2})?)\s*(?:has been\s*)?(?:debited|deducted)"
-    r".*?(?:a/?c\s*[*xX]*(\d{4}))?"
-    r".*?(?:on\s+(\d{2}[/-]\d{2}[/-]\d{2,4}))?"
-    r".*?(?:Info:\s*(.+))?$",
+# ── HDFC patterns ──────────────────────────────────────────────────────────
+
+# Format A: "Rs.X is debited from your account ending NNNN towards VPA vpa@upi (Name) on DD-MM-YY."
+_HDFC_UPI_VPA = re.compile(
+    r"Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+is\s+debited\s+from\s+your\s+account\s+ending\s+\d+"
+    r"\s+towards\s+VPA\s+\S+\s+\(([^)]+)\)\s+on\s+(\d{2}-\d{2}-\d{2,4})",
+    re.IGNORECASE,
+)
+
+# Format B: "Rs.X has been debited from account NNNN to account *NNNN on DD-MM-YY."
+_HDFC_TRANSFER = re.compile(
+    r"Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+has\s+been\s+debited\s+from\s+account\s+\d+"
+    r"\s+to\s+account\s+\*(\d+)\s+on\s+(\d{2}-\d{2}-\d{2,4})",
+    re.IGNORECASE,
+)
+
+# Format C: "ATM withdrawal for Rs X in CITY at MERCHANT on DD-MM-YYYY HH:MM:SS"
+_HDFC_ATM = re.compile(
+    r"ATM\s+withdrawal\s+for\s+Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+in\s+\S+"
+    r"\s+at\s+([\w\s]+?)\s+on\s+(\d{2}-\d{2}-\d{4})",
+    re.IGNORECASE,
+)
+
+# ── ICICI CC patterns ───────────────────────────────────────────────────────
+
+# Format D: "transaction of INR/USD X on Mon DD, YYYY at HH:MM:SS. Info: MERCHANT."
+_ICICI_CC_SPEND = re.compile(
+    r"transaction\s+of\s+(INR|USD)\s*([\d,]+(?:\.\d{1,2})?)"
+    r"\s+on\s+(\w+\s+\d{1,2},\s+\d{4})\s+at\s+[\d:]+\."
+    r"\s+Info:\s+([^.\n]+)",
+    re.IGNORECASE,
+)
+
+# Format E: "received payment of INR X on your ICICI Bank Credit Card ... on DD-Mon-YYYY."
+_ICICI_CC_PAYMENT = re.compile(
+    r"received\s+payment\s+of\s+INR\s*([\d,]+(?:\.\d{1,2})?)"
+    r".*?on\s+(\d{1,2}-\w{3}-\d{4})",
     re.IGNORECASE | re.DOTALL,
 )
 
-_HDFC_CREDIT = re.compile(
-    r"(?:Rs\.?\s*|INR\s*|₹\s*)([\d,]+(?:\.\d{1,2})?)\s*(?:has been\s*)?credited"
-    r".*?(?:a/?c\s*[*xX]*(\d{4}))?"
-    r".*?(?:on\s+(\d{2}[/-]\d{2}[/-]\d{2,4}))?"
-    r".*?(?:Info:\s*(.+))?$",
+# ── ICICI Savings patterns ──────────────────────────────────────────────────
+
+# Format F: "Cash Withdrawal of Rs. X has been made at an ATM ... on DD-Mon-YY. Info: DETAIL."
+_ICICI_ATM = re.compile(
+    r"Cash\s+Withdrawal\s+of\s+Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+has\s+been\s+made\s+at\s+an\s+ATM"
+    r".*?on\s+(\d{1,2}-\w{3}-\d{2,4})\."
+    r"\s*Info:\s+([^\n.]+)",
     re.IGNORECASE | re.DOTALL,
 )
 
-# ICICI alert format example:
-#   "Dear Customer, INR 2,000.00 debited from a/c XX1234 on 14-May-26.
-#    Info: UPI/AMAZON. Avl Bal: INR 45,000.00"
-
-_ICICI_DEBIT = re.compile(
-    r"(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)\s*debited\s+from\s+(?:a/?c|Acct)\s*[xX*]*(\d{4})"
-    r".*?on\s+(\d{2}[-/]\w{3}[-/]\d{2,4}|\d{2}[-/]\d{2}[-/]\d{2,4})"
-    r".*?Info:\s*([^\n.]+)",
-    re.IGNORECASE | re.DOTALL,
+# Format G: "NEFT payment of Rs. X towards MERCHANT on Mon DD, YYYY"
+_ICICI_NEFT = re.compile(
+    r"(?:NEFT|IMPS|UPI)\s+payment\s+of\s+Rs\.?\s*([\d,]+(?:\.\d{1,2})?)"
+    r"\s+towards\s+(.+?)\s+on\s+(\w+\s+\d{1,2},\s+\d{4})",
+    re.IGNORECASE,
 )
 
-_ICICI_CREDIT = re.compile(
-    r"(?:INR|Rs\.?|₹)\s*([\d,]+(?:\.\d{1,2})?)\s*credited\s+(?:to\s+)?(?:a/?c|Acct)\s*[xX*]*(\d{4})"
-    r".*?on\s+(\d{2}[-/]\w{3}[-/]\d{2,4}|\d{2}[-/]\d{2}[-/]\d{2,4})"
-    r".*?Info:\s*([^\n.]+)",
-    re.IGNORECASE | re.DOTALL,
+# ── SBI CC pattern ──────────────────────────────────────────────────────────
+
+# Format H: "Rs.X spent on your SBI Credit Card ending NNNN at MERCHANT on DD/MM/YY."
+_SBI_CC_SPEND = re.compile(
+    r"Rs\.?\s*([\d,]+(?:\.\d{1,2})?)\s+spent\s+on\s+your\s+SBI\s+Credit\s+Card"
+    r"\s+ending\s+\d+\s+at\s+(.+?)\s+on\s+(\d{2}/\d{2}/\d{2,4})",
+    re.IGNORECASE,
 )
+
+
+def _build_full_text(email: dict) -> str:
+    """
+    Build the best possible plain-text representation of an email.
+    Priority: text/plain body → stripped text/html body → snippet.
+    The snippet is always prepended so short, snippet-only emails still work.
+    """
+    plain_parts: list[str] = []
+    html_parts: list[str] = []
+
+    for part in email.get("parts", []):
+        mime = part.get("mime", "")
+        text = part.get("text", "")
+        if not text:
+            continue
+        if mime == "text/plain":
+            plain_parts.append(text)
+        elif mime == "text/html":
+            html_parts.append(_strip_html(text))
+
+    body = " ".join(plain_parts) if plain_parts else " ".join(html_parts)
+    snippet = email.get("snippet", "")
+    combined = f"{snippet} {body}".strip()
+    return " ".join(combined.split())  # normalise whitespace
+
+
+def _safe_amount(raw: str) -> Optional[float]:
+    try:
+        return float(raw.replace(",", ""))
+    except (ValueError, AttributeError):
+        return None
+
+
+def _parse_hdfc(email: dict, full_text: str) -> list[dict]:
+    """Parse all HDFC alert formats (UPI VPA, account transfer, ATM)."""
+    results: list[dict] = []
+    date_fallback = datetime.now().strftime("%Y-%m-%d")
+
+    # Format A – UPI / VPA
+    m = _HDFC_UPI_VPA.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        merchant = m.group(2).strip()
+        date_str = extract_date(m.group(3)) or date_fallback
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "debit", "HDFC",
+                                             merchant, "email_alert"))
+            return results
+
+    # Format B – account-to-account transfer
+    m = _HDFC_TRANSFER.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        desc = f"Transfer to *{m.group(2)}"
+        date_str = extract_date(m.group(3)) or date_fallback
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "debit", "HDFC",
+                                             desc, "email_alert"))
+            return results
+
+    # Format C – ATM withdrawal
+    m = _HDFC_ATM.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        merchant = m.group(2).strip()
+        date_str = extract_date(m.group(3)) or date_fallback
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "debit", "HDFC",
+                                             f"ATM {merchant}", "email_alert"))
+            return results
+
+    return results
+
+
+def _parse_icici_cc(email: dict, full_text: str) -> list[dict]:
+    """Parse ICICI Credit Card alert formats (spend + payment received)."""
+    results: list[dict] = []
+    date_fallback = datetime.now().strftime("%Y-%m-%d")
+
+    # Format D – CC spend (debit)
+    m = _ICICI_CC_SPEND.search(full_text)
+    if m:
+        currency = m.group(1).upper()  # INR or USD
+        amt = _safe_amount(m.group(2))
+        date_str = extract_date(m.group(3)) or date_fallback
+        merchant = m.group(4).strip()
+        if amt and amt > 0:
+            t = build_transaction(date_str, amt, "debit", "ICICI_CC",
+                                  merchant, "email_alert")
+            if currency != "INR":
+                t["currency"] = currency
+            results.append(t)
+            return results
+
+    # Format E – CC payment received (credit)
+    m = _ICICI_CC_PAYMENT.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        date_str = extract_date(m.group(2)) or date_fallback
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "credit", "ICICI_CC",
+                                             "CC Payment Received", "email_alert"))
+            return results
+
+    return results
+
+
+def _parse_icici_savings(email: dict, full_text: str) -> list[dict]:
+    """Parse ICICI Savings account alert formats (ATM + NEFT)."""
+    results: list[dict] = []
+    date_fallback = datetime.now().strftime("%Y-%m-%d")
+
+    # Format F – ATM / debit card withdrawal
+    m = _ICICI_ATM.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        date_str = extract_date(m.group(2)) or date_fallback
+        info = m.group(3).strip()
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "debit", "ICICI",
+                                             f"ATM {info}", "email_alert"))
+            return results
+
+    # Format G – NEFT / IMPS outward payment
+    m = _ICICI_NEFT.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        merchant = m.group(2).strip()
+        date_str = extract_date(m.group(3)) or date_fallback
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "debit", "ICICI",
+                                             merchant, "email_alert"))
+            return results
+
+    return results
+
+
+def _parse_sbi_cc(email: dict, full_text: str) -> list[dict]:
+    """Parse SBI Credit Card alert format."""
+    results: list[dict] = []
+    date_fallback = datetime.now().strftime("%Y-%m-%d")
+
+    # Format H – CC spend
+    m = _SBI_CC_SPEND.search(full_text)
+    if m:
+        amt = _safe_amount(m.group(1))
+        merchant = m.group(2).strip()
+        date_str = extract_date(m.group(3)) or date_fallback
+        if amt and amt > 0:
+            results.append(build_transaction(date_str, amt, "debit", "SBI_CC",
+                                             merchant, "email_alert"))
+            return results
+
+    return results
 
 
 def parse_alert_email(email: dict) -> list[dict]:
     """
-    Parse an HDFC or ICICI transaction alert email into Transaction dicts.
-    Handles both debit and credit alerts in both SMS-style and HTML formats.
+    Parse a bank transaction alert email into Transaction dicts.
+    Supports HDFC savings, ICICI CC, ICICI savings, and SBI CC formats.
+    Routes to the correct per-bank parser based on sender address.
     Returns list of parsed transactions (usually 1, occasionally 0).
     """
-    transactions = []
     sender = email.get("from", "").lower()
-    snippet = email.get("snippet", "")
+    full_text = _build_full_text(email)
 
-    # Collect all plain-text parts
-    text_parts = []
-    for part in email.get("parts", []):
-        if part.get("mime") == "text/plain":
-            text_parts.append(part.get("text", ""))
-
-    full_text = snippet + " " + " ".join(text_parts)
-    full_text = " ".join(full_text.split())  # normalise whitespace
-
-    # Determine account from sender.
-    # Note: matches both legacy domains (icicibank.com) and the new
+    # ── Sender routing ────────────────────────────────────────────────────────
+    # Matches both legacy domains (icicibank.com, hdfcbank.net) and the
     # RBI-mandated .bank.in domains (hdfcbank.bank.in, icici.bank.in).
+
     if "hdfc" in sender:
-        account = "HDFC"
-        debit_pat, credit_pat = _HDFC_DEBIT, _HDFC_CREDIT
-    elif "icici" in sender and "credit" not in sender and "cc" not in sender:
-        account = "ICICI"
-        debit_pat, credit_pat = _ICICI_DEBIT, _ICICI_CREDIT
-    elif "icici" in sender:
-        account = "ICICI_CC"
-        debit_pat, credit_pat = _ICICI_DEBIT, _ICICI_CREDIT
-    elif "sbicard" in sender or "sbi" in sender:
-        account = "SBI_CC"
-        debit_pat, credit_pat = _HDFC_DEBIT, _HDFC_CREDIT
-    else:
-        return []  # Unknown sender — skip
+        return _parse_hdfc(email, full_text)
 
-    def try_parse(pattern, tx_type: str) -> Optional[dict]:
-        m = pattern.search(full_text)
-        if not m:
-            return None
-        try:
-            amount = float(m.group(1).replace(",", ""))
-            date_raw = m.group(3) if m.lastindex >= 3 else ""
-            date_str = extract_date(date_raw) if date_raw else datetime.now().strftime("%Y-%m-%d")
-            description = (m.group(4) if m.lastindex >= 4 else "").strip() or email.get("subject", "")
-            return build_transaction(date_str, amount, tx_type, account, description, "email_alert")
-        except Exception as e:
-            log.debug(f"Alert parse sub-error: {e}")
-            return None
+    if "icici" in sender:
+        # credit_cards@icici.bank.in  /  credit_cards@icicibank.com
+        if "credit_cards" in sender:
+            return _parse_icici_cc(email, full_text)
+        # alert@icici.bank.in  (ATM / debit card alerts for savings account)
+        # customernotification@icici.bank.in  (NEFT / IMPS)
+        if "alert@" in sender or "customernotification" in sender:
+            return _parse_icici_savings(email, full_text)
+        # cards@icici.bank.in sends upcoming-payment reminders AND confirmations.
+        # Confirmations duplicate credit_cards@icici.bank.in — skip to avoid dupes.
+        # Other ICICI senders (marketing, KYC, services) carry no transactions.
+        return []
 
-    debit_tx = try_parse(debit_pat, "debit")
-    if debit_tx:
-        transactions.append(debit_tx)
+    if "sbicard" in sender:
+        return _parse_sbi_cc(email, full_text)
 
-    credit_tx = try_parse(credit_pat, "credit")
-    if credit_tx:
-        transactions.append(credit_tx)
-
-    return transactions
+    return []  # Unknown sender
 
 
 # ─── SMS forward parser ───────────────────────────────────────────────────────
-# Forwarded SMS emails typically contain the raw SMS text in the body.
-# The SMS format varies by bank but usually matches the alert patterns above.
-# We detect SMS-forwards by subject keywords and route accordingly.
+# Forwarded SMS emails contain raw SMS text in the body.
+# We detect them by subject keywords and reuse alert parsing; only the
+# raw_source tag differs.
 
 SMS_FORWARD_SUBJECTS = re.compile(
     r"(fwd|forward|sms|txn alert|transaction alert)",

@@ -181,42 +181,76 @@ def extract_amount(text: str) -> Optional[float]:
 
 # ─── Date extraction helper ───────────────────────────────────────────────────
 
-_DATE_PATTERNS = [
-    re.compile(r"\b(\d{2})[/-](\d{2})[/-](\d{4})\b"),   # DD/MM/YYYY or DD-MM-YYYY
-    re.compile(r"\b(\d{4})[/-](\d{2})[/-](\d{2})\b"),   # YYYY-MM-DD (ISO)
-    re.compile(r"\b(\d{2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})\b", re.I),
-]
-
 _MONTH_MAP = {
     "jan": "01", "feb": "02", "mar": "03", "apr": "04",
     "may": "05", "jun": "06", "jul": "07", "aug": "08",
     "sep": "09", "oct": "10", "nov": "11", "dec": "12",
 }
 
+# Ordered from most-specific to least-specific to avoid short patterns swallowing
+# part of a longer date string.
+_DATE_PATTERNS = [
+    # DD/MM/YYYY or DD-MM-YYYY  (4-digit year)  e.g. "12-05-2026"
+    ("dmy4",  re.compile(r"\b(\d{2})[/-](\d{2})[/-](\d{4})\b")),
+    # YYYY-MM-DD  (ISO)  e.g. "2026-05-12"
+    ("iso",   re.compile(r"\b(\d{4})[/-](\d{2})[/-](\d{2})\b")),
+    # DD Mon YYYY  e.g. "14 May 2026"  (legacy style used by some HDFC/ICICI emails)
+    ("dmy4m", re.compile(r"\b(\d{1,2})\s+(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{4})\b", re.I)),
+    # Mon DD, YYYY  e.g. "May 24, 2026"  (ICICI CC / savings NEFT format)
+    ("mdy4",  re.compile(r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\s+(\d{1,2}),?\s+(\d{4})\b", re.I)),
+    # DD-Mon-YYYY or DD-Mon-YY  e.g. "29-Apr-2026", "29-Apr-26"  (ICICI ATM / CC payment)
+    ("dmym",  re.compile(r"\b(\d{1,2})-(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*-(\d{2,4})\b", re.I)),
+    # DD/MM/YY or DD-MM-YY  (2-digit year → 20xx)  e.g. "24-05-26", "23/05/26"
+    # NOTE: must come AFTER 4-digit patterns to avoid matching the last two digits of YYYY.
+    ("dmy2",  re.compile(r"\b(\d{2})[/-](\d{2})[/-](\d{2})\b")),
+]
+
 
 def extract_date(text: str) -> Optional[str]:
     """
     Extract and normalise a date string from raw text to YYYY-MM-DD.
+    Handles all date formats used by Indian bank alert emails:
+      DD-MM-YYYY, YYYY-MM-DD, DD Mon YYYY, Mon DD YYYY, DD-Mon-YY, DD/MM/YY.
     Returns None if no date found.
     """
-    # DD/MM/YYYY or DD-MM-YYYY
-    m = _DATE_PATTERNS[0].search(text)
-    if m:
-        dd, mm, yyyy = m.group(1), m.group(2), m.group(3)
-        return f"{yyyy}-{mm}-{dd}"
+    if not text:
+        return None
 
-    # YYYY-MM-DD
-    m = _DATE_PATTERNS[1].search(text)
-    if m:
-        return m.group(0).replace("/", "-")
+    for kind, pat in _DATE_PATTERNS:
+        m = pat.search(text)
+        if not m:
+            continue
 
-    # "14 May 2026" style
-    m = _DATE_PATTERNS[2].search(text)
-    if m:
-        dd = m.group(1).zfill(2)
-        mm = _MONTH_MAP[m.group(2).lower()[:3]]
-        yyyy = m.group(3)
-        return f"{yyyy}-{mm}-{dd}"
+        if kind == "dmy4":
+            dd, mm, yyyy = m.group(1), m.group(2), m.group(3)
+            return f"{yyyy}-{mm}-{dd}"
+
+        if kind == "iso":
+            return m.group(0).replace("/", "-")
+
+        if kind == "dmy4m":
+            dd = m.group(1).zfill(2)
+            mm = _MONTH_MAP[m.group(2).lower()[:3]]
+            yyyy = m.group(3)
+            return f"{yyyy}-{mm}-{dd}"
+
+        if kind == "mdy4":
+            mm = _MONTH_MAP[m.group(1).lower()[:3]]
+            dd = m.group(2).zfill(2)
+            yyyy = m.group(3)
+            return f"{yyyy}-{mm}-{dd}"
+
+        if kind == "dmym":
+            dd = m.group(1).zfill(2)
+            mm = _MONTH_MAP[m.group(2).lower()[:3]]
+            yr = m.group(3)
+            yyyy = f"20{yr}" if len(yr) == 2 else yr
+            return f"{yyyy}-{mm}-{dd}"
+
+        if kind == "dmy2":
+            dd, mo, yy = m.group(1), m.group(2), m.group(3)
+            yyyy = f"20{yy}"
+            return f"{yyyy}-{mo}-{dd}"
 
     return None
 
