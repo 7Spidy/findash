@@ -4,23 +4,23 @@
     {
       "type": "large_single",
       "title": "Unidentified UPI Transaction of ₹730",
-      "description": "A single UPI transaction of ₹730 this month has no clear merchant name, only showing a generic alert message. This makes it impossible to verify the purpose or legitimacy of the payment.",
+      "description": "A single UPI transaction of ₹730 was made this month with an unclear merchant description ('You Have Done A Upi Txn. Check Detail'). This makes it impossible to verify the purpose or legitimacy of the payment.",
       "estimated_saving": 0
     },
     {
       "type": "spike",
-      "title": "Others Category Jumped from ₹0 to ₹730",
-      "description": "The 'Others' category had zero spending last month but now accounts for ₹730 this month, representing a 100% spike. The entire month's spend is concentrated in a single unidentified transaction.",
+      "title": "Spending Jumped from ₹0 to ₹730 This Month",
+      "description": "Last month's total spending was ₹0, while this month shows ₹730 entirely in the 'Others' category. Though the percentage change is not calculated, this represents a full spike from zero activity.",
       "estimated_saving": 0
     }
   ],
   "subscriptions": [],
   "tips": [
-    "Investigate the ₹730 UPI transaction immediately — the merchant name shows only a generic alert text, which could indicate a mislabelled, fraudulent, or accidental payment. Check your UPI app or bank statement for the actual recipient UPI ID.",
-    "Since 100% of your May 2026 spending (₹730) falls under 'Others', work on categorising this transaction correctly so future months have meaningful category breakdowns for better budgeting.",
-    "Your 3-month average spend in 'Others' is ₹243.33, but this month it is ₹730 — nearly 3x the average. If this transaction is recurring, budget at least ₹730/month for this category going forward.",
-    "Set up UPI transaction alerts with merchant name verification on your banking app. Generic or missing merchant names on transactions above ₹500 should be flagged and reviewed within 24 hours to catch potential errors or fraud early.",
-    "With only one transaction recorded this month and no data from last month, ensure all your bank accounts and UPI apps are linked to your expense tracker to get a complete and accurate picture of your actual monthly spending."
+    "Verify the ₹730 UPI transaction immediately — the merchant name 'You Have Done A Upi Txn. Check Detail' is a common pattern seen in phishing or mislabelled transactions. Check your UPI app (GPay/PhonePe/Paytm) for the actual payee name and UTR number.",
+    "All ₹730 of your spending this month is categorised under 'Others', which signals poor transaction categorisation. Link your bank account to a budgeting app like Walnut or Money Manager to auto-categorise future UPI payments.",
+    "Since your last month spending was ₹0 and this month is ₹730, consider setting a monthly UPI spend alert at ₹500 in your bank's mobile app to get notified before you cross your baseline.",
+    "Your 3-month average spend is ₹243.33/month, meaning this month's ₹730 is 3x your average. If this was a one-time payment (e.g., bill, fee), ensure it does not recur unknowingly by checking if any standing instruction or auto-debit was set up.",
+    "No subscriptions were detected this month, which is positive. However, given the unidentified ₹730 transaction, cross-check with your email inbox for any subscription confirmation receipts that may have triggered this charge."
   ],
   "category_insights": [
     {
