@@ -1,5 +1,9 @@
 {
+<<<<<<< HEAD
   "timestamp": "2026-05-24T15:32:15.084584+00:00",
+=======
+  "timestamp": "2026-02-23T00:00:00+00:00",
+>>>>>>> d3d8cd7 (data: reset last_updated timestamp for 90-day Gmail backfill)
   "emails_fetched": 0,
   "transactions_added": 49,
   "parse_errors": 0,
