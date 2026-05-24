@@ -2,16 +2,22 @@
   "generated_at": "2026-05-24",
   "alerts": [
     {
-      "type": "unused_subscription",
-      "title": "Recurring charge: LinkedIn Premium",
-      "description": "Rs.1,699/month detected as a regular subscription.",
-      "estimated_saving": 1699
+      "type": "spike",
+      "title": "Health & Fitness spending increased by 7.9%",
+      "description": "Your health spending rose to ₹20,990 this month from ₹19,455 last month, driven by ₹10,974 at Apollo Pharmacy and ₹5,041 at MedPlus.",
+      "estimated_saving": 0
+    },
+    {
+      "type": "large_single",
+      "title": "High Croma purchases totaling ₹48,762",
+      "description": "You made 3 transactions at Croma totaling ₹48,762 this month, representing 16% of your total spending.",
+      "estimated_saving": 0
     },
     {
       "type": "unused_subscription",
-      "title": "Recurring charge: ChatGPT Plus",
-      "description": "Rs.1,699/month detected as a regular subscription.",
-      "estimated_saving": 1699
+      "title": "Multiple subscription services active",
+      "description": "You have ₹6,209 in monthly subscriptions including LinkedIn Premium (₹1,699), ChatGPT Plus (₹1,699), and Zomato (₹4,395).",
+      "estimated_saving": 3398
     }
   ],
   "subscriptions": [
@@ -30,6 +36,13 @@
       "category": "Subscriptions"
     },
     {
+      "name": "Self Transfer",
+      "amount": 30000.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-01",
+      "category": "Transfers"
+    },
+    {
       "name": "ChatGPT Plus",
       "amount": 1699.0,
       "frequency": "monthly",
@@ -42,18 +55,14 @@
       "frequency": "monthly",
       "last_charged": "2026-05-09",
       "category": "Entertainment"
-    },
-    {
-      "name": "Self Transfer",
-      "amount": 30000.0,
-      "frequency": "monthly",
-      "last_charged": "2026-05-01",
-      "category": "Transfers"
     }
   ],
   "tips": [
-    "Top 3 merchants this month: Croma, ATM, Amazon. Consider setting per-merchant monthly budgets.",
-    "Detected Rs.41,487/month in recurring subscriptions. Review each for active usage."
+    "Your shopping category dropped 34.8% to ₹135,547 - maintain this reduced spending on Amazon (₹35,593) and Flipkart (₹18,208) purchases",
+    "Food delivery spending through Swiggy (₹7,539) and Zomato subscription (₹4,395) totals ₹11,934 - consider cooking more meals at home to save ₹5,000+ monthly",
+    "You're spending ₹15,015 monthly on pharmacy purchases (Apollo ₹10,974 + MedPlus ₹5,041) - consolidate to one pharmacy for better discounts",
+    "Transport costs decreased 23.1% to ₹18,281 - continue using cost-effective travel methods instead of premium options like IndiGo (₹11,563)",
+    "Review your ₹1,699 LinkedIn Premium and ₹1,699 ChatGPT Plus subscriptions - cancel if not actively using professional features to save ₹3,398 monthly"
   ],
   "category_insights": [
     {
