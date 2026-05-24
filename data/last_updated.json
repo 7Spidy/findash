@@ -1,7 +1,7 @@
 {
-  "timestamp": "2026-02-23T07:19:31.788769+00:00",
+  "timestamp": "2026-05-24T07:59:49.780089+00:00",
   "emails_fetched": 0,
-  "transactions_added": 0,
+  "transactions_added": 554,
   "parse_errors": 0,
   "pipeline_version": "1.0.0"
 }
