@@ -3,213 +3,39 @@
   "alerts": [
     {
       "type": "large_single",
-      "title": "₹48,762 spent at Croma in 3 transactions",
-      "description": "Croma is your top merchant this month with ₹48,762.28 across just 3 transactions, making it a significant one-time or short-burst expense. If any items are unused or returnable, this is worth reviewing.",
+      "title": "Unidentified UPI Transaction of ₹730",
+      "description": "A single UPI transaction of ₹730 this month has no clear merchant name, only showing a generic alert message. This makes it impossible to verify the purpose or legitimacy of the payment.",
       "estimated_saving": 0
     },
     {
       "type": "spike",
-      "title": "Health & Fitness up 7.9% — Apollo Pharmacy at ₹10,975",
-      "description": "Health & Fitness rose to ₹20,989.98 this month from ₹19,455.16 last month, with Apollo Pharmacy accounting for ₹10,974.38 across 10 visits and MedPlus adding another ₹5,040.78 across 6 visits. Combined pharmacy spend of ₹16,015 warrants checking for duplicate purchases or switching to a single pharmacy for bulk discounts.",
-      "estimated_saving": 1500
-    },
-    {
-      "type": "duplicate",
-      "title": "Dual food subscriptions: Zomato (₹4,395) + active Swiggy spend (₹7,539)",
-      "description": "You are paying ₹4,395.15/month for a Zomato subscription while also spending ₹7,538.62 on Swiggy (15 transactions) this month. Consolidating all food delivery to one platform could eliminate the subscription fee on the lesser-used service.",
-      "estimated_saving": 4395
-    },
-    {
-      "type": "unused_subscription",
-      "title": "INOX monthly subscription at ₹3,694 vs. BookMyShow spend of ₹4,636",
-      "description": "You are paying ₹3,694.19/month for an INOX subscription but also spending ₹4,636.37 at BookMyShow across 6 transactions, suggesting split cinema habits. If BookMyShow is your preferred platform, cancelling the INOX subscription could save ₹3,694 monthly.",
-      "estimated_saving": 3694
+      "title": "Others Category Jumped from ₹0 to ₹730",
+      "description": "The 'Others' category had zero spending last month but now accounts for ₹730 this month, representing a 100% spike. The entire month's spend is concentrated in a single unidentified transaction.",
+      "estimated_saving": 0
     }
   ],
-  "subscriptions": [
-    {
-      "name": "Zomato",
-      "amount": 4395.15,
-      "frequency": "monthly",
-      "last_charged": "2026-05-24",
-      "category": "Food & Dining"
-    },
-    {
-      "name": "INOX",
-      "amount": 3694.19,
-      "frequency": "monthly",
-      "last_charged": "2026-05-09",
-      "category": "Entertainment"
-    },
-    {
-      "name": "Self Transfer",
-      "amount": 30000.0,
-      "frequency": "monthly",
-      "last_charged": "2026-05-01",
-      "category": "Transfers"
-    },
-    {
-      "name": "LinkedIn Premium",
-      "amount": 1699.0,
-      "frequency": "monthly",
-      "last_charged": "2026-05-18",
-      "category": "Subscriptions"
-    },
-    {
-      "name": "ChatGPT Plus",
-      "amount": 1699.0,
-      "frequency": "monthly",
-      "last_charged": "2026-05-05",
-      "category": "Subscriptions"
-    }
-  ],
+  "subscriptions": [],
   "tips": [
-    "Consolidate your pharmacy purchases: you spent ₹10,974 at Apollo Pharmacy (10 visits) and ₹5,040 at MedPlus (6 visits) this month — pick one pharmacy and ask for a regular-customer discount or use Apollo's subscription plan to save an estimated 10–15% on recurring medicines.",
-    "Your ATM withdrawals totalled ₹47,000 across 7 transactions this month — switching to UPI or card payments would eliminate ATM fees (typically ₹20–21 per transaction beyond free limits) and make spending trackable by category instead of landing in 'Others'.",
-    "Shopping at ₹1,35,546 is your largest category and still 14% above the 3-month average of ₹1,57,054 — Amazon (₹35,592, 10 orders) and Flipkart (₹18,207, 6 orders) together account for ₹53,800; enable 'Save for Later' for non-urgent items and wait for sale events to reduce impulse purchases.",
-    "You are spending ₹9,793.15/month on LinkedIn Premium (₹1,699) and ChatGPT Plus (₹1,699) plus an INOX subscription (₹3,694) — review whether LinkedIn Premium is delivering active value (job searches, InMail usage); downgrading to a free plan saves ₹1,699/month instantly.",
-    "Your Food & Dining spend of ₹27,256 this month included ₹7,538 on Swiggy (15 orders, avg ₹502/order) and a ₹4,395 Zomato subscription — setting a weekly Swiggy budget of ₹1,500 and batch-ordering rather than ordering daily could cut this category by ₹4,000–5,000/month."
+    "Investigate the ₹730 UPI transaction immediately — the merchant name shows only a generic alert text, which could indicate a mislabelled, fraudulent, or accidental payment. Check your UPI app or bank statement for the actual recipient UPI ID.",
+    "Since 100% of your May 2026 spending (₹730) falls under 'Others', work on categorising this transaction correctly so future months have meaningful category breakdowns for better budgeting.",
+    "Your 3-month average spend in 'Others' is ₹243.33, but this month it is ₹730 — nearly 3x the average. If this transaction is recurring, budget at least ₹730/month for this category going forward.",
+    "Set up UPI transaction alerts with merchant name verification on your banking app. Generic or missing merchant names on transactions above ₹500 should be flagged and reviewed within 24 hours to catch potential errors or fraud early.",
+    "With only one transaction recorded this month and no data from last month, ensure all your bank accounts and UPI apps are linked to your expense tracker to get a complete and accurate picture of your actual monthly spending."
   ],
   "category_insights": [
     {
-      "category": "Entertainment",
-      "this_month": 10081.07,
-      "last_month": 10864.23,
-      "avg_3m": 9304.88,
-      "change_pct": -7.2
-    },
-    {
-      "category": "Food & Dining",
-      "this_month": 27256.18,
-      "last_month": 34367.09,
-      "avg_3m": 30174.18,
-      "change_pct": -20.7
-    },
-    {
-      "category": "Health & Fitness",
-      "this_month": 20989.98,
-      "last_month": 19455.16,
-      "avg_3m": 18165.54,
-      "change_pct": 7.9
-    },
-    {
       "category": "Others",
-      "this_month": 47730.0,
-      "last_month": 51000.0,
-      "avg_3m": 40576.67,
-      "change_pct": -6.4
-    },
-    {
-      "category": "Shopping",
-      "this_month": 135546.53,
-      "last_month": 207957.35,
-      "avg_3m": 157054.28,
-      "change_pct": -34.8
-    },
-    {
-      "category": "Subscriptions",
-      "this_month": 6209.0,
-      "last_month": 6209.0,
-      "avg_3m": 5790.33,
-      "change_pct": 0.0
-    },
-    {
-      "category": "Transfers",
-      "this_month": 30000.0,
-      "last_month": 30000.0,
-      "avg_3m": 30000.0,
-      "change_pct": 0.0
-    },
-    {
-      "category": "Transport",
-      "this_month": 18280.69,
-      "last_month": 23767.02,
-      "avg_3m": 19599.25,
-      "change_pct": -23.1
-    },
-    {
-      "category": "Utilities",
-      "this_month": 5780.98,
-      "last_month": 9858.14,
-      "avg_3m": 7077.86,
-      "change_pct": -41.4
+      "this_month": 730.0,
+      "last_month": 0,
+      "avg_3m": 243.33,
+      "change_pct": 0
     }
   ],
   "top_merchants": [
     {
-      "merchant": "Croma",
-      "total": 48762.28,
-      "count": 3
-    },
-    {
-      "merchant": "ATM",
-      "total": 47000.0,
-      "count": 7
-    },
-    {
-      "merchant": "Amazon",
-      "total": 35592.92,
-      "count": 10
-    },
-    {
-      "merchant": "Self Transfer",
-      "total": 30000.0,
+      "merchant": "❗  You Have Done A Upi Txn. Check Detail",
+      "total": 730.0,
       "count": 1
-    },
-    {
-      "merchant": "Flipkart",
-      "total": 18207.95,
-      "count": 6
-    },
-    {
-      "merchant": "IKEA",
-      "total": 14898.56,
-      "count": 1
-    },
-    {
-      "merchant": "IndiGo Airlines",
-      "total": 11563.33,
-      "count": 1
-    },
-    {
-      "merchant": "Apollo Pharmacy",
-      "total": 10974.38,
-      "count": 10
-    },
-    {
-      "merchant": "Myntra",
-      "total": 8420.77,
-      "count": 4
-    },
-    {
-      "merchant": "Swiggy",
-      "total": 7538.62,
-      "count": 15
-    },
-    {
-      "merchant": "Meesho",
-      "total": 5573.13,
-      "count": 6
-    },
-    {
-      "merchant": "MedPlus",
-      "total": 5040.78,
-      "count": 6
-    },
-    {
-      "merchant": "Cult.fit",
-      "total": 4974.82,
-      "count": 4
-    },
-    {
-      "merchant": "Blinkit",
-      "total": 4971.81,
-      "count": 7
-    },
-    {
-      "merchant": "BookMyShow",
-      "total": 4636.37,
-      "count": 6
     }
   ]
 }
