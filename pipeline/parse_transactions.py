@@ -20,6 +20,7 @@ Run standalone (processes pending_emails.json + any PDFs in /tmp/findash_pdfs/):
 import hashlib
 import json
 import logging
+import os
 import re
 import sys
 from datetime import datetime, timezone
@@ -40,7 +41,7 @@ log = logging.getLogger(__name__)
 REPO_ROOT = Path(__file__).parent.parent
 DATA_DIR = REPO_ROOT / "data"
 RAW_DIR = DATA_DIR / "raw"
-TMP_PDF_DIR = Path(__file__).parent.parent / "tmp" / "findash_pdfs"
+TMP_PDF_DIR = Path(os.environ.get("TEMP", "/tmp")) / "findash_pdfs"
 
 TRANSACTIONS_PATH = DATA_DIR / "transactions.json"
 PARSE_ERRORS_PATH = DATA_DIR / "parse_errors.json"
