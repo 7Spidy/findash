@@ -2,45 +2,88 @@
   "generated_at": "2026-05-24",
   "alerts": [
     {
+      "type": "spike",
+      "title": "Others category exploded 1,484% this month",
+      "description": "The 'Others' category jumped from ₹45,029 last month to ₹7,13,212 this month — a 1,484% spike. The top contributors are an unverified UPI transaction cluster (₹4,69,910 across 47 transactions) and a suspicious ₹99,999 transfer labelled 'View: Account Update For Your HDFC Bank', which resembles a phishing or fraud transaction.",
+      "estimated_saving": 0
+    },
+    {
       "type": "large_single",
-      "title": "Suspicious Large Transaction: ₹99,999 Bank Account Update",
-      "description": "A single transaction of ₹99,999 from merchant 'View: Account Update For Your HDFC Bank' was recorded. This description pattern is commonly associated with phishing or fraudulent bank notification scams — legitimate banks do not debit accounts for 'account updates'. Verify this transaction immediately with HDFC Bank.",
+      "title": "Suspicious ₹99,999 bank 'account update' transaction",
+      "description": "A single ₹99,999 payment to 'View: Account Update For Your HDFC Bank' was made once this month. This label is not a legitimate merchant name and may indicate a fraudulent UPI transaction — verify this immediately with your bank.",
       "estimated_saving": 99999
     },
     {
       "type": "spike",
-      "title": "Unclassified 'Others' Category Dominates Spending at ₹5,69,909",
-      "description": "₹5,69,909 (nearly 100% of this month's total spend of ₹5,69,911) falls under the 'Others' category, which is ₹3,79,939 above the 3-month average of ₹1,89,970. This extreme concentration of unclassified spend makes budgeting and fraud detection very difficult.",
-      "estimated_saving": 0
+      "title": "Food & Dining up 64% — Zomato and Pizza Express driving costs",
+      "description": "Food & Dining rose from ₹5,151 last month to ₹8,444 this month (63.9% increase). Zomato alone accounts for ₹4,028 across 5 orders, and a single Pizza Express visit cost ₹2,853.",
+      "estimated_saving": 3000
     },
     {
-      "type": "large_single",
-      "title": "47 UPI Transactions Totalling ₹4,69,910 with Vague Merchant Name",
-      "description": "The top merchant entry '❗ You Have Done A UPI Txn. Check Detail' accounts for 47 transactions totalling ₹4,69,910 — averaging ₹9,998 per transaction. This generic description suggests these transactions are either unresolved UPI references or potentially unauthorised; each should be individually verified in your UPI app.",
-      "estimated_saving": 0
-    },
-    {
-      "type": "duplicate",
-      "title": "Possible Fraudulent Credit Card Debit of ₹2",
-      "description": "A transaction of ₹2 from 'A Payment Was Made Using Your Credit Car' is a classic penny-test charge used by fraudsters to verify a card is active before making larger unauthorised charges. Cross-check your credit card statement and report to your bank if unrecognised.",
-      "estimated_saving": 0
+      "type": "spike",
+      "title": "Shopping jumped 170% to ₹13,831 this month",
+      "description": "Shopping spend surged from ₹5,131 last month to ₹13,831 this month, well above the 3-month average of ₹14,597. Amazon Pay E-Commerce (₹6,004) and Blinkit (₹4,416 across 2 orders) are the primary contributors.",
+      "estimated_saving": 4000
     }
   ],
-  "subscriptions": [],
+  "subscriptions": [
+    {
+      "name": "Medium Monthly",
+      "amount": 5.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-09",
+      "category": "Others"
+    },
+    {
+      "name": "Googleplay",
+      "amount": 429.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-12",
+      "category": "Others"
+    },
+    {
+      "name": "Shanti Dham Chs Ltd",
+      "amount": 16844.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-16",
+      "category": "Others"
+    }
+  ],
   "tips": [
-    "Immediately call HDFC Bank on their official helpline (1800-202-6161) to verify the ₹99,999 'Account Update' transaction — if fraudulent, file a dispute within 30 days to maximise chargeback chances.",
-    "Review all 47 UPI transactions averaging ₹9,998 each (total ₹4,69,910) in your UPI app (BHIM/GPay/PhonePe) by checking the merchant VPA for each — report any unrecognised payees to your bank and NPCI at 18001201740.",
-    "Block or freeze your credit card linked to the ₹2 'Payment Made Using Your Credit Car' test charge immediately via your bank's app to prevent larger fraudulent charges that may follow such penny-testing attempts.",
-    "Request your bank to apply proper merchant name tagging or use a UPI app with detailed transaction categorisation — currently 99.9% of your ₹5,69,911 spend is in 'Others', making it impossible to track or budget by category.",
-    "Set a UPI transaction alert and daily cap (recommended: ₹25,000/day for personal use) via your bank's net banking portal — this month's average UPI transaction of ₹9,998 across 47 transactions suggests high-value transfers that warrant additional authentication controls."
+    "Immediately contact HDFC Bank to verify the ₹99,999 transaction labelled 'View: Account Update For Your HDFC Bank' — this does not match any legitimate merchant and may be a fraud or phishing payment.",
+    "Review your 47 UPI transactions totalling ₹4,69,910 flagged under the unrecognised merchant '❗ You Have Done A UPI Txn. Check Detail' — categorise and audit these to identify any unauthorised or duplicate payments.",
+    "You spent ₹4,028 on Zomato across 5 orders this month (avg ₹806/order). Cooking at home just 2–3 of those meals could save approximately ₹1,500–₹2,000 monthly and bring Food & Dining back closer to the ₹5,150 level from last month.",
+    "Your Googleplay subscription costs ₹429/month — review active subscriptions within Google Play to check for unused app subscriptions or auto-renewing services that can be cancelled, potentially saving ₹200–₹429/month.",
+    "Blinkit spend was ₹4,416 across just 2 orders this month (avg ₹2,208/order). Consolidating grocery runs into weekly bulk purchases on Amazon Grocery (where you're already spending) could reduce impulse delivery fees and per-item costs by an estimated ₹1,000–₹1,500/month."
   ],
   "category_insights": [
     {
+      "category": "Entertainment",
+      "this_month": 505.0,
+      "last_month": 1061.28,
+      "avg_3m": 2188.43,
+      "change_pct": -52.4
+    },
+    {
+      "category": "Food & Dining",
+      "this_month": 8443.75,
+      "last_month": 5150.84,
+      "avg_3m": 7234.73,
+      "change_pct": 63.9
+    },
+    {
       "category": "Others",
-      "this_month": 569908.89,
-      "last_month": 0,
-      "avg_3m": 189969.63,
-      "change_pct": 0
+      "this_month": 713211.98,
+      "last_month": 45029.74,
+      "avg_3m": 262155.56,
+      "change_pct": 1483.9
+    },
+    {
+      "category": "Shopping",
+      "this_month": 13830.56,
+      "last_month": 5130.99,
+      "avg_3m": 14596.67,
+      "change_pct": 169.5
     },
     {
       "category": "Transfers",
@@ -48,6 +91,13 @@
       "last_month": 0,
       "avg_3m": 0.67,
       "change_pct": 0
+    },
+    {
+      "category": "Transport",
+      "this_month": 1840.74,
+      "last_month": 4659.52,
+      "avg_3m": 4772.03,
+      "change_pct": -60.5
     }
   ],
   "top_merchants": [
@@ -62,9 +112,69 @@
       "count": 1
     },
     {
-      "merchant": "A Payment Was Made Using Your Credit Car",
-      "total": 2.0,
+      "merchant": "Avinash Ganesh Bangera",
+      "total": 50000.0,
       "count": 1
+    },
+    {
+      "merchant": "Transfer To *9517",
+      "total": 42501.0,
+      "count": 2
+    },
+    {
+      "merchant": "Shanti Dham Chs Ltd",
+      "total": 16844.0,
+      "count": 1
+    },
+    {
+      "merchant": "Akshata Ganesh Bangera",
+      "total": 10932.0,
+      "count": 1
+    },
+    {
+      "merchant": "Supreme Chambers",
+      "total": 10000.0,
+      "count": 1
+    },
+    {
+      "merchant": "Amazon Pay In E Commerce",
+      "total": 6004.0,
+      "count": 1
+    },
+    {
+      "merchant": "Amazon Pay In Grocery",
+      "total": 5866.56,
+      "count": 4
+    },
+    {
+      "merchant": "Blinkit",
+      "total": 4416.0,
+      "count": 2
+    },
+    {
+      "merchant": "Zomato",
+      "total": 4027.75,
+      "count": 5
+    },
+    {
+      "merchant": "Pizzaexpressunitof",
+      "total": 2853.0,
+      "count": 1
+    },
+    {
+      "merchant": "Amazon Pay India Pvt Ltd",
+      "total": 1960.0,
+      "count": 1
+    },
+    {
+      "merchant": "Bigtree Entertainment Pvt",
+      "total": 1921.6,
+      "count": 1
+    },
+    {
+      "merchant": "Uber India Syste Pvt Ltd",
+      "total": 1805.03,
+      "count": 2
     }
   ]
 }
