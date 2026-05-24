@@ -47,6 +47,10 @@ TRANSACTIONS_PATH = DATA_DIR / "transactions.json"
 PARSE_ERRORS_PATH = DATA_DIR / "parse_errors.json"
 PENDING_EMAILS_PATH = RAW_DIR / "pending_emails.json"
 
+# ─── PDF passwords (set as GitHub Actions secrets) ────────────────────────────
+ICICI_CC_PDF_PASSWORD = os.environ.get("ICICI_CC_PDF_PASSWORD", "")
+SBI_CC_PDF_PASSWORD   = os.environ.get("SBI_CC_PDF_PASSWORD", "")
+
 
 # ─── Transaction builder ──────────────────────────────────────────────────────
 
@@ -285,43 +289,98 @@ def parse_bank_statement_pdf(pdf_path: Path, account: str) -> list[dict]:
 
 # ─── PDF credit card statement parser ─────────────────────────────────────────
 
+def _parse_cc_pdf_by_text(pdf, card: str) -> list[dict]:
+    """
+    Fallback: extract CC transactions from raw PDF text when table extraction yields nothing.
+    Handles common Indian CC statement text formats:
+      "15 Apr 2026  AMAZON SHOPPING  1,299.00  DR"
+      "15/04/26  SWIGGY ORDER  450.00"
+    """
+    transactions = []
+    # Match: date  description  amount  optional CR/DR
+    row_pat = re.compile(
+        r"(\d{1,2}[\s\-/][A-Za-z]{3}[\s\-/]\d{2,4}|\d{2}[/\-]\d{2}[/\-]\d{2,4})"
+        r"[ \t]+(.{3,60}?)[ \t]+"
+        r"([\d,]+\.\d{2})"
+        r"[ \t]*(CR|DR)?",
+        re.IGNORECASE,
+    )
+    for page in pdf.pages:
+        text = page.extract_text() or ""
+        for m in row_pat.finditer(text):
+            date_raw, desc_raw, amt_raw, type_hint = m.groups()
+            date_str = extract_date(date_raw.strip())
+            if not date_str:
+                continue
+            try:
+                amount = float(amt_raw.replace(",", ""))
+                if amount <= 0:
+                    continue
+                tx_type = "credit" if (type_hint or "DR").upper() == "CR" else "debit"
+                t = build_transaction(date_str, amount, tx_type, card, desc_raw.strip(), "cc_statement_text")
+                transactions.append(t)
+            except Exception:
+                pass
+    log.info(f"  Text fallback extracted {len(transactions)} transactions")
+    return transactions
+
+
 def parse_cc_statement_pdf(pdf_path: Path, card: str) -> list[dict]:
     """
     Parse a credit card statement PDF.
-    CC statements list transactions as: Date | Description | Amount (all debits unless a refund).
-
-    Returns list of Transaction dicts.
+    1. Tries table extraction (structured PDFs).
+    2. Falls back to raw-text regex if tables yield 0 rows.
+    Supports password-protected PDFs via ICICI_CC_PDF_PASSWORD / SBI_CC_PDF_PASSWORD env vars.
     """
     try:
         import pdfplumber
     except ImportError:
+        log.warning("pdfplumber not installed — skipping PDF parsing")
         return []
 
+    password = ICICI_CC_PDF_PASSWORD if "icici" in card.lower() else SBI_CC_PDF_PASSWORD
     transactions = []
-    log.info(f"Parsing CC statement PDF: {pdf_path.name}")
+    log.info(f"Parsing CC statement PDF: {pdf_path.name} (password={'set' if password else 'not set'})")
 
     try:
-        with pdfplumber.open(pdf_path) as pdf:
+        open_kwargs: dict = {}
+        if password:
+            open_kwargs["password"] = password
+
+        with pdfplumber.open(pdf_path, **open_kwargs) as pdf:
+            log.info(f"  Opened OK — {len(pdf.pages)} page(s)")
+
             for page_num, page in enumerate(pdf.pages):
                 tables = page.extract_tables()
+                log.debug(f"  Page {page_num + 1}: {len(tables)} table(s)")
+
                 for table in tables:
                     if not table or len(table) < 2:
                         continue
                     header = [str(c or "").strip().lower() for c in table[0]]
+                    log.info(f"  Table header cols: {header}")
 
                     date_col = next((i for i, h in enumerate(header) if "date" in h), None)
-                    desc_col = next((i for i, h in enumerate(header) if any(k in h for k in ("desc", "narr", "particular", "merchant", "transaction"))), None)
-                    amt_col = next((i for i, h in enumerate(header) if any(k in h for k in ("amount", "amt", "charge"))), None)
-                    type_col = next((i for i, h in enumerate(header) if any(k in h for k in ("dr/cr", "type", "cr/dr"))), None)
+                    desc_col = next((i for i, h in enumerate(header) if any(
+                        k in h for k in ("desc", "narr", "particular", "merchant", "transaction", "detail")
+                    )), None)
+                    amt_col  = next((i for i, h in enumerate(header) if any(
+                        k in h for k in ("amount", "amt", "charge", "inr")
+                    )), None)
+                    type_col = next((i for i, h in enumerate(header) if any(
+                        k in h for k in ("dr/cr", "cr/dr", "type")
+                    )), None)
 
                     if date_col is None or desc_col is None or amt_col is None:
+                        log.info(f"  Skipping table — couldn't map columns. "
+                                 f"date={date_col} desc={desc_col} amt={amt_col}")
                         continue
 
                     for row in table[1:]:
                         try:
-                            date_raw = str(row[date_col] or "").strip()
-                            desc_raw = str(row[desc_col] or "").strip()
-                            amt_raw = str(row[amt_col] or "").strip().replace(",", "")
+                            date_raw  = str(row[date_col] or "").strip()
+                            desc_raw  = str(row[desc_col] or "").strip()
+                            amt_raw   = str(row[amt_col]  or "").strip().replace(",", "")
                             type_hint = str(row[type_col] or "").strip().upper() if type_col is not None else "DR"
 
                             if not date_raw or not desc_raw or not amt_raw:
@@ -333,18 +392,26 @@ def parse_cc_statement_pdf(pdf_path: Path, card: str) -> list[dict]:
                             if not date_str:
                                 continue
 
-                            amount = float(amt_raw)
-                            # Refunds are tagged CR on CC statements
-                            tx_type = "credit" if "CR" in type_hint else "debit"
-
+                            amount   = float(amt_raw)
+                            tx_type  = "credit" if "CR" in type_hint else "debit"
                             t = build_transaction(date_str, amount, tx_type, card, desc_raw, "cc_statement")
                             transactions.append(t)
 
                         except Exception as e:
-                            log.debug(f"CC row parse error (page {page_num}): {e}")
+                            log.debug(f"  CC row parse error (page {page_num + 1}): {e}")
+
+            # ── Fallback to text extraction if tables gave nothing ─────────────
+            if not transactions:
+                log.warning(f"  Table extraction yielded 0 transactions — trying text fallback")
+                transactions = _parse_cc_pdf_by_text(pdf, card)
 
     except Exception as e:
-        log.error(f"Failed to open CC PDF {pdf_path}: {e}")
+        err = str(e)
+        log.error(f"  Failed to open/parse CC PDF {pdf_path.name}: {err}")
+        if "password" in err.lower() or "encrypt" in err.lower() or "incorrect" in err.lower():
+            log.error(f"  PDF appears password-protected. Set ICICI_CC_PDF_PASSWORD / "
+                      f"SBI_CC_PDF_PASSWORD secret in GitHub Actions.")
+        save_pdf_error(pdf_path, err)
 
     log.info(f"  Parsed {len(transactions)} transactions from {pdf_path.name}")
     return transactions
@@ -411,6 +478,23 @@ def log_parse_error(email: dict, error: str) -> None:
     PARSE_ERRORS_PATH.write_text(json.dumps(errors, indent=2))
 
 
+def save_pdf_error(pdf_path: Path, error: str) -> None:
+    """Append a PDF parse failure to parse_errors.json for post-run diagnosis."""
+    errors = []
+    if PARSE_ERRORS_PATH.exists():
+        try:
+            errors = json.loads(PARSE_ERRORS_PATH.read_text())
+        except Exception:
+            pass
+    errors.append({
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "source": "pdf",
+        "filename": pdf_path.name,
+        "error": error,
+    })
+    PARSE_ERRORS_PATH.write_text(json.dumps(errors, indent=2))
+
+
 # ─── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> int:
@@ -461,10 +545,12 @@ def main() -> int:
 
     # ── Parse PDFs ────────────────────────────────────────────────────────────
     if TMP_PDF_DIR.exists():
-        for pdf_path in TMP_PDF_DIR.glob("*.pdf"):
+        pdf_files = list(TMP_PDF_DIR.glob("*.pdf"))
+        log.info(f"PDF directory found: {TMP_PDF_DIR} — {len(pdf_files)} file(s)")
+        for pdf_path in pdf_files:
+            log.info(f"Processing PDF: {pdf_path.name}")
             name_lower = pdf_path.name.lower()
             try:
-                # Determine account/card from filename hints
                 if "sbi" in name_lower:
                     txns = parse_cc_statement_pdf(pdf_path, "SBI_CC")
                 elif "icici" in name_lower and "cc" in name_lower:
@@ -475,13 +561,15 @@ def main() -> int:
                     txns = parse_bank_statement_pdf(pdf_path, "HDFC")
                 else:
                     log.warning(f"Cannot determine account for PDF: {pdf_path.name}. Skipping.")
+                    save_pdf_error(pdf_path, "Cannot determine account from filename")
                     continue
 
                 new_transactions.extend(txns)
             except Exception as e:
                 log.error(f"Failed to parse PDF {pdf_path.name}: {e}")
+                save_pdf_error(pdf_path, str(e))
     else:
-        log.info("No PDF directory found. Skipping PDF parsing.")
+        log.info(f"No PDF directory found at {TMP_PDF_DIR}. Skipping PDF parsing.")
 
     # ── Deduplicate and merge ─────────────────────────────────────────────────
     merged, added = deduplicate(existing, new_transactions)

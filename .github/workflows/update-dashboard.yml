@@ -55,14 +55,22 @@ jobs:
 
       # ── 4. Parse transactions ──────────────────────────────────────────────
       - name: Parse transactions
+        env:
+          ICICI_CC_PDF_PASSWORD: ${{ secrets.ICICI_CC_PDF_PASSWORD }}
+          SBI_CC_PDF_PASSWORD: ${{ secrets.SBI_CC_PDF_PASSWORD }}
         run: |
           cd pipeline
           python parse_transactions.py
           echo "parse_transactions completed"
-          # Log parse error count for visibility
+          # Print full parse_errors.json for immediate visibility in Actions log
           if [ -f "../data/parse_errors.json" ]; then
             COUNT=$(python -c "import json; d=json.load(open('../data/parse_errors.json')); print(len(d))")
             echo "Parse errors logged: $COUNT"
+            if [ "$COUNT" -gt "0" ]; then
+              echo "--- parse_errors.json ---"
+              cat ../data/parse_errors.json
+              echo "--- end ---"
+            fi
             if [ "$COUNT" -gt "10" ]; then
               echo "::warning::High parse error count: $COUNT. Review data/parse_errors.json"
             fi
