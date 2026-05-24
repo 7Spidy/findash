@@ -3,36 +3,36 @@
   "alerts": [
     {
       "type": "large_single",
-      "title": "Suspicious Large UPI Transaction Block — ₹4,69,909.89",
-      "description": "A merchant flagged as '❗ You Have Done A UPI Txn. Check Detail' has accumulated ₹4,69,909.89 across 47 transactions this month. This pattern — an alert-style merchant name with high-frequency large payments — is a strong indicator of phishing, fraud, or mislabelled bulk transfers that warrant immediate review.",
-      "estimated_saving": 469909
-    },
-    {
-      "type": "large_single",
-      "title": "Unverified Bank Account Update Transaction — ₹99,999",
-      "description": "A single transaction of ₹99,999 is attributed to 'View: Account Update For Your HDFC Bank', which is a known phishing message format. Legitimate banks never request payments via UPI for account updates — this should be reported to HDFC Bank and NPCI immediately.",
+      "title": "Suspicious Large Transaction: ₹99,999 Bank Account Update",
+      "description": "A single transaction of ₹99,999 from merchant 'View: Account Update For Your HDFC Bank' was recorded. This description pattern is commonly associated with phishing or fraudulent bank notification scams — legitimate banks do not debit accounts for 'account updates'. Verify this transaction immediately with HDFC Bank.",
       "estimated_saving": 99999
     },
     {
       "type": "spike",
-      "title": "Others Category Spiked to ₹5,69,908.89 vs ₹0 Last Month",
-      "description": "The 'Others' category jumped from ₹0 last month to ₹5,69,908.89 this month, a 100% new spend with no historical baseline. This extreme spike, combined with suspicious merchant names, suggests potential fraudulent activity rather than legitimate spending.",
+      "title": "Unclassified 'Others' Category Dominates Spending at ₹5,69,909",
+      "description": "₹5,69,909 (nearly 100% of this month's total spend of ₹5,69,911) falls under the 'Others' category, which is ₹3,79,939 above the 3-month average of ₹1,89,970. This extreme concentration of unclassified spend makes budgeting and fraud detection very difficult.",
+      "estimated_saving": 0
+    },
+    {
+      "type": "large_single",
+      "title": "47 UPI Transactions Totalling ₹4,69,910 with Vague Merchant Name",
+      "description": "The top merchant entry '❗ You Have Done A UPI Txn. Check Detail' accounts for 47 transactions totalling ₹4,69,910 — averaging ₹9,998 per transaction. This generic description suggests these transactions are either unresolved UPI references or potentially unauthorised; each should be individually verified in your UPI app.",
       "estimated_saving": 0
     },
     {
       "type": "duplicate",
-      "title": "47 Repeat Transactions to Suspicious UPI Merchant",
-      "description": "The merchant '❗ You Have Done A UPI Txn. Check Detail' received 47 separate payments averaging ₹9,998 each. Repeated payments to an unrecognised or fraud-pattern merchant may indicate an active phishing loop or auto-debit scam that should be blocked immediately.",
-      "estimated_saving": 469909
+      "title": "Possible Fraudulent Credit Card Debit of ₹2",
+      "description": "A transaction of ₹2 from 'A Payment Was Made Using Your Credit Car' is a classic penny-test charge used by fraudsters to verify a card is active before making larger unauthorised charges. Cross-check your credit card statement and report to your bank if unrecognised.",
+      "estimated_saving": 0
     }
   ],
   "subscriptions": [],
   "tips": [
-    "Immediately contact HDFC Bank's fraud helpline (1800-202-6161) and dispute the ₹99,999 'Account Update' transaction — banks never charge for account updates via UPI and this matches a known phishing template.",
-    "Freeze or review the UPI handle responsible for the 47 transactions totalling ₹4,69,909.89 to '❗ You Have Done A UPI Txn. Check Detail' — log in to your UPI app and check mandate or auto-pay settings for any unrecognised recurring authorisations.",
-    "File a complaint on the RBI's Sachet portal (https://sachet.rbi.org.in) and NPCI's dispute portal for both suspicious merchants, attaching transaction IDs — fraudulent UPI transfers reported within 3 days have a higher chargeback success rate.",
-    "Set a UPI transaction limit of ₹5,000 per transaction on your bank app for daily use, reserving higher limits only for verified payees — this would have flagged each of the 47 suspicious transactions averaging ₹9,998 before execution.",
-    "Enable transaction SMS and email alerts for every debit above ₹500 on your HDFC Bank account — the ₹99,999 single transaction and the 47-transaction cluster should have triggered real-time alerts that could have allowed early intervention."
+    "Immediately call HDFC Bank on their official helpline (1800-202-6161) to verify the ₹99,999 'Account Update' transaction — if fraudulent, file a dispute within 30 days to maximise chargeback chances.",
+    "Review all 47 UPI transactions averaging ₹9,998 each (total ₹4,69,910) in your UPI app (BHIM/GPay/PhonePe) by checking the merchant VPA for each — report any unrecognised payees to your bank and NPCI at 18001201740.",
+    "Block or freeze your credit card linked to the ₹2 'Payment Made Using Your Credit Car' test charge immediately via your bank's app to prevent larger fraudulent charges that may follow such penny-testing attempts.",
+    "Request your bank to apply proper merchant name tagging or use a UPI app with detailed transaction categorisation — currently 99.9% of your ₹5,69,911 spend is in 'Others', making it impossible to track or budget by category.",
+    "Set a UPI transaction alert and daily cap (recommended: ₹25,000/day for personal use) via your bank's net banking portal — this month's average UPI transaction of ₹9,998 across 47 transactions suggests high-value transfers that warrant additional authentication controls."
   ],
   "category_insights": [
     {
