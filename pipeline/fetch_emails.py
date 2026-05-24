@@ -292,6 +292,20 @@ def fetch_emails(service, since_epoch: str) -> list[dict]:
     return results
 
 
+def _bank_tag(sender: str) -> str:
+    """Derive a short bank identifier from a sender email address."""
+    s = sender.lower()
+    if "sbicard" in s:
+        return "sbi_cc"
+    if "icicicredit" in s or "ccalerts" in s:
+        return "icici_cc"
+    if "icicibank" in s:
+        return "icici"
+    if "hdfcbank" in s:
+        return "hdfc"
+    return "unknown"
+
+
 def download_pdf_attachments(service, emails: list[dict]) -> dict[str, Path]:
     """
     Download PDF attachments from fetched emails to TMP_PDF_DIR.
@@ -300,12 +314,13 @@ def download_pdf_attachments(service, emails: list[dict]) -> dict[str, Path]:
     paths: dict[str, Path] = {}
 
     for email in emails:
+        tag = _bank_tag(email.get("from", ""))
         for part in email.get("parts", []):
             att_id = part.get("attachment_id")
             if not att_id:
                 continue
             filename = part.get("filename", f"attachment_{att_id}.pdf")
-            out_path = TMP_PDF_DIR / f"{email['id']}_{filename}"
+            out_path = TMP_PDF_DIR / f"{tag}_{email['id']}_{filename}"
 
             if out_path.exists():
                 log.debug(f"PDF already downloaded: {out_path.name}")

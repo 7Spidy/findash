@@ -102,14 +102,24 @@ jobs:
           print(f"Metadata written: {meta}")
           EOF
 
-      # ── 7. Commit updated data ─────────────────────────────────────────────
+      # ── 7. Sync data/ → public/data/ (what Vercel actually serves) ───────────
+      - name: Sync data to public/data
+        run: |
+          cp data/transactions.json public/data/transactions.json
+          cp data/insights.json     public/data/insights.json
+          cp data/last_updated.json public/data/last_updated.json
+          echo "Synced data/ to public/data/"
+
+      # ── 8. Commit updated data ─────────────────────────────────────────────
       - name: Commit updated data files
         if: ${{ github.event.inputs.dry_run != 'true' }}
         run: |
           git config user.name "FinDash Pipeline"
           git config user.email "pipeline@findash.app"
           git add data/transactions.json data/accounts.json data/credit_cards.json \
-                  data/insights.json data/last_updated.json
+                  data/insights.json data/last_updated.json \
+                  public/data/transactions.json public/data/insights.json \
+                  public/data/last_updated.json
 
           # Only commit if there are actual changes
           if git diff --cached --quiet; then
@@ -124,7 +134,7 @@ jobs:
             echo "Data committed and pushed."
           fi
 
-      # ── 8. Dry run summary ─────────────────────────────────────────────────
+      # ── 9. Dry run summary ─────────────────────────────────────────────────
       - name: Dry run summary
         if: ${{ github.event.inputs.dry_run == 'true' }}
         run: |
