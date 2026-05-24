@@ -4,42 +4,42 @@
     {
       "type": "large_single",
       "title": "₹48,762 spent at Croma in 3 transactions",
-      "description": "Croma is your top merchant this month with ₹48,762.28 across just 3 purchases, making it the single largest merchant spend. Combined with ₹35,592.92 on Amazon (10 transactions), electronics and online shopping is driving your ₹1,35,546 Shopping category total.",
+      "description": "Croma is your top merchant this month with ₹48,762.28 across just 3 transactions, making it a significant one-time or short-burst expense. If any items are unused or returnable, this is worth reviewing.",
       "estimated_saving": 0
     },
     {
       "type": "spike",
-      "title": "Health & Fitness up 7.9% with pharmacy spend rising sharply",
-      "description": "Health & Fitness hit ₹20,989.98 this month vs a 3-month average of ₹18,165.54 — a ₹2,824 overage. Apollo Pharmacy alone accounts for ₹10,974.38 across 10 visits, and MedPlus adds another ₹5,040.78 across 6 visits, totalling ₹16,015.16 in pharmacy spend this month.",
-      "estimated_saving": 2800
+      "title": "Health & Fitness up 7.9% — Apollo Pharmacy at ₹10,975",
+      "description": "Health & Fitness rose to ₹20,989.98 this month from ₹19,455.16 last month, with Apollo Pharmacy accounting for ₹10,974.38 across 10 visits and MedPlus adding another ₹5,040.78 across 6 visits. Combined pharmacy spend of ₹16,015 warrants checking for duplicate purchases or switching to a single pharmacy for bulk discounts.",
+      "estimated_saving": 1500
     },
     {
       "type": "duplicate",
-      "title": "Two overlapping pharmacy subscriptions: Apollo & MedPlus",
-      "description": "You spent ₹10,974.38 at Apollo Pharmacy (10 transactions) and ₹5,040.78 at MedPlus (6 transactions) this month — a combined ₹16,015.16. Consolidating all pharmacy purchases to one provider could unlock loyalty rewards and reduce impulse top-ups.",
-      "estimated_saving": 1600
+      "title": "Dual food subscriptions: Zomato (₹4,395) + active Swiggy spend (₹7,539)",
+      "description": "You are paying ₹4,395.15/month for a Zomato subscription while also spending ₹7,538.62 on Swiggy (15 transactions) this month. Consolidating all food delivery to one platform could eliminate the subscription fee on the lesser-used service.",
+      "estimated_saving": 4395
     },
     {
       "type": "unused_subscription",
-      "title": "LinkedIn Premium at ₹1,699/month — assess usage vs ChatGPT Plus",
-      "description": "You are paying ₹1,699/month each for both LinkedIn Premium and ChatGPT Plus, totalling ₹3,398/month in AI/professional tool subscriptions. If LinkedIn Premium is not actively generating leads or job value, cancelling it saves ₹1,699 immediately.",
-      "estimated_saving": 1699
+      "title": "INOX monthly subscription at ₹3,694 vs. BookMyShow spend of ₹4,636",
+      "description": "You are paying ₹3,694.19/month for an INOX subscription but also spending ₹4,636.37 at BookMyShow across 6 transactions, suggesting split cinema habits. If BookMyShow is your preferred platform, cancelling the INOX subscription could save ₹3,694 monthly.",
+      "estimated_saving": 3694
     }
   ],
   "subscriptions": [
-    {
-      "name": "LinkedIn Premium",
-      "amount": 1699.0,
-      "frequency": "monthly",
-      "last_charged": "2026-05-18",
-      "category": "Subscriptions"
-    },
     {
       "name": "Zomato",
       "amount": 4395.15,
       "frequency": "monthly",
       "last_charged": "2026-05-24",
       "category": "Food & Dining"
+    },
+    {
+      "name": "INOX",
+      "amount": 3694.19,
+      "frequency": "monthly",
+      "last_charged": "2026-05-09",
+      "category": "Entertainment"
     },
     {
       "name": "Self Transfer",
@@ -49,11 +49,11 @@
       "category": "Transfers"
     },
     {
-      "name": "INOX",
-      "amount": 3694.19,
+      "name": "LinkedIn Premium",
+      "amount": 1699.0,
       "frequency": "monthly",
-      "last_charged": "2026-05-09",
-      "category": "Entertainment"
+      "last_charged": "2026-05-18",
+      "category": "Subscriptions"
     },
     {
       "name": "ChatGPT Plus",
@@ -64,11 +64,11 @@
     }
   ],
   "tips": [
-    "Your ATM withdrawals totalled ₹47,000 across 7 transactions this month — averaging ₹6,714 per withdrawal. Shifting these cash spends to UPI or card payments will make them trackable and help identify where this cash is actually going, since it currently falls into an unanalysed 'Others' bucket.",
-    "Food & Dining spend of ₹27,256 includes a Zomato subscription at ₹4,395/month plus ₹7,538.62 on Swiggy (15 orders) and ₹4,971.81 on Blinkit. Consider whether the Zomato Gold/Pro subscription is delivering enough free deliveries and discounts to justify ₹4,395 — if Swiggy is your primary ordering app, switching the subscription there or dropping it entirely could save ₹2,000–₹4,000/month.",
-    "Shopping at ₹1,35,546 is your largest category and still 14% above the 3-month average of ₹1,57,054 — but the April spike to ₹2,07,957 suggests binge-buying cycles. Set a monthly shopping cap of ₹1,20,000 and defer non-urgent Amazon and Flipkart (₹18,207) purchases to a weekly review day to avoid impulse buys across 16 combined transactions.",
-    "You spent ₹14,898.56 at IKEA in a single transaction this month. Large one-off home purchases like this are best planned with a sinking fund — setting aside ₹5,000/month into a dedicated home/furnishing budget would let you make these purchases without spiking your monthly totals unexpectedly.",
-    "Entertainment spending of ₹10,081 is 8.4% above the 3-month average of ₹9,304. BookMyShow (₹4,636 across 6 bookings) and INOX as a recurring ₹3,694/month subscription together account for the bulk of this. Evaluate whether a monthly INOX subscription makes sense alongside active BookMyShow usage — picking one primary cinema channel could save approximately ₹1,500–₹2,000/month."
+    "Consolidate your pharmacy purchases: you spent ₹10,974 at Apollo Pharmacy (10 visits) and ₹5,040 at MedPlus (6 visits) this month — pick one pharmacy and ask for a regular-customer discount or use Apollo's subscription plan to save an estimated 10–15% on recurring medicines.",
+    "Your ATM withdrawals totalled ₹47,000 across 7 transactions this month — switching to UPI or card payments would eliminate ATM fees (typically ₹20–21 per transaction beyond free limits) and make spending trackable by category instead of landing in 'Others'.",
+    "Shopping at ₹1,35,546 is your largest category and still 14% above the 3-month average of ₹1,57,054 — Amazon (₹35,592, 10 orders) and Flipkart (₹18,207, 6 orders) together account for ₹53,800; enable 'Save for Later' for non-urgent items and wait for sale events to reduce impulse purchases.",
+    "You are spending ₹9,793.15/month on LinkedIn Premium (₹1,699) and ChatGPT Plus (₹1,699) plus an INOX subscription (₹3,694) — review whether LinkedIn Premium is delivering active value (job searches, InMail usage); downgrading to a free plan saves ₹1,699/month instantly.",
+    "Your Food & Dining spend of ₹27,256 this month included ₹7,538 on Swiggy (15 orders, avg ₹502/order) and a ₹4,395 Zomato subscription — setting a weekly Swiggy budget of ₹1,500 and batch-ordering rather than ordering daily could cut this category by ₹4,000–5,000/month."
   ],
   "category_insights": [
     {

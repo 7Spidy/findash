@@ -72,6 +72,18 @@
     "currency": "INR"
   },
   {
+    "id": "525f9599c371d390",
+    "date": "2026-05-24",
+    "amount": 730.0,
+    "type": "debit",
+    "account": "HDFC",
+    "description": "❗  You have done a UPI txn. Check details!",
+    "merchant": "❗  You Have Done A Upi Txn. Check Detail",
+    "category": "Others",
+    "raw_source": "email_alert",
+    "currency": "INR"
+  },
+  {
     "id": "50947a8a44454b0f",
     "date": "2026-05-23",
     "amount": 539.04,
