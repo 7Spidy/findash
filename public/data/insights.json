@@ -1,44 +1,44 @@
 {
-  "generated_at": "2026-05-24",
+  "generated_at": "2026-05-25",
   "alerts": [
     {
       "type": "spike",
-      "title": "Others category exploded 1,484% this month",
-      "description": "The 'Others' category jumped from ₹45,029 last month to ₹7,13,212 this month — a 1,484% spike. The top contributors are an unverified UPI transaction cluster (₹4,69,910 across 47 transactions) and a suspicious ₹99,999 transfer labelled 'View: Account Update For Your HDFC Bank', which resembles a phishing or fraud transaction.",
+      "title": "Others Category Exploded by 1,484%",
+      "description": "The 'Others' category jumped from ₹45,029.74 last month to ₹7,13,211.98 this month — an increase of ₹6,68,182.24. The top contributor is an obfuscated UPI merchant '❗ You Have Done A Upi Txn. Check Detail' accounting for ₹4,69,909.89 across 47 transactions, which warrants immediate review for potential fraud or miscategorisation.",
       "estimated_saving": 0
     },
     {
       "type": "large_single",
-      "title": "Suspicious ₹99,999 bank 'account update' transaction",
-      "description": "A single ₹99,999 payment to 'View: Account Update For Your HDFC Bank' was made once this month. This label is not a legitimate merchant name and may indicate a fraudulent UPI transaction — verify this immediately with your bank.",
+      "title": "Suspicious ₹99,999 Single Transaction to HDFC Account Update",
+      "description": "A single payment of ₹99,999 was made to 'View: Account Update For Your Hdfc Bank', which is a common phishing/fraud descriptor pattern. This transaction should be verified immediately with your bank as it may be unauthorised.",
       "estimated_saving": 99999
     },
     {
       "type": "spike",
-      "title": "Food & Dining up 64% — Zomato and Pizza Express driving costs",
-      "description": "Food & Dining rose from ₹5,151 last month to ₹8,444 this month (63.9% increase). Zomato alone accounts for ₹4,028 across 5 orders, and a single Pizza Express visit cost ₹2,853.",
-      "estimated_saving": 3000
+      "title": "Food & Dining Up 75% — Zomato and Blinkit Driving Costs",
+      "description": "Food & Dining rose from ₹5,150.84 to ₹9,008.75 this month (+74.9%). Zomato alone accounted for ₹4,027.75 across 5 orders and Blinkit added ₹4,981 across 3 orders — together totalling ₹9,008.75, nearly the entire category spend.",
+      "estimated_saving": 2500
     },
     {
       "type": "spike",
-      "title": "Shopping jumped 170% to ₹13,831 this month",
-      "description": "Shopping spend surged from ₹5,131 last month to ₹13,831 this month, well above the 3-month average of ₹14,597. Amazon Pay E-Commerce (₹6,004) and Blinkit (₹4,416 across 2 orders) are the primary contributors.",
-      "estimated_saving": 4000
+      "title": "Shopping Spiked 169% with ₹13,830 Spent",
+      "description": "Shopping jumped from ₹5,130.99 last month to ₹13,830.56 this month, well above the 3-month average of ₹14,596.67. Amazon Pay E-Commerce (₹6,004) and Amazon Pay India (₹1,960) together contributed ₹7,964 — review if these were planned purchases.",
+      "estimated_saving": 3000
     }
   ],
   "subscriptions": [
-    {
-      "name": "Medium Monthly",
-      "amount": 5.0,
-      "frequency": "monthly",
-      "last_charged": "2026-05-09",
-      "category": "Others"
-    },
     {
       "name": "Googleplay",
       "amount": 429.0,
       "frequency": "monthly",
       "last_charged": "2026-05-12",
+      "category": "Others"
+    },
+    {
+      "name": "Medium Monthly",
+      "amount": 5.0,
+      "frequency": "monthly",
+      "last_charged": "2026-05-09",
       "category": "Others"
     },
     {
@@ -50,11 +50,11 @@
     }
   ],
   "tips": [
-    "Immediately contact HDFC Bank to verify the ₹99,999 transaction labelled 'View: Account Update For Your HDFC Bank' — this does not match any legitimate merchant and may be a fraud or phishing payment.",
-    "Review your 47 UPI transactions totalling ₹4,69,910 flagged under the unrecognised merchant '❗ You Have Done A UPI Txn. Check Detail' — categorise and audit these to identify any unauthorised or duplicate payments.",
-    "You spent ₹4,028 on Zomato across 5 orders this month (avg ₹806/order). Cooking at home just 2–3 of those meals could save approximately ₹1,500–₹2,000 monthly and bring Food & Dining back closer to the ₹5,150 level from last month.",
-    "Your Googleplay subscription costs ₹429/month — review active subscriptions within Google Play to check for unused app subscriptions or auto-renewing services that can be cancelled, potentially saving ₹200–₹429/month.",
-    "Blinkit spend was ₹4,416 across just 2 orders this month (avg ₹2,208/order). Consolidating grocery runs into weekly bulk purchases on Amazon Grocery (where you're already spending) could reduce impulse delivery fees and per-item costs by an estimated ₹1,000–₹1,500/month."
+    "Immediately contact HDFC Bank to verify the ₹99,999 transaction to 'View: Account Update For Your Hdfc Bank' — this merchant name matches known UPI phishing patterns and may be fraudulent.",
+    "Audit the 47 UPI transactions totalling ₹4,69,909.89 flagged under '❗ You Have Done A Upi Txn. Check Detail' — recategorise them to understand true spending and identify any unauthorised payments.",
+    "You spent ₹4,027.75 on 5 Zomato orders this month (avg ₹805/order) — cooking at home just 2 of those meals could save approximately ₹1,500–₹1,800/month based on your current order value.",
+    "Blinkit spend of ₹4,981 across only 3 orders averages ₹1,660/order — consolidating quick-commerce orders to once a week and switching to a planned Amazon Fresh or supermarket visit can reduce impulse grocery spends by 20–30%, saving roughly ₹1,000–₹1,500/month.",
+    "Review the Medium Monthly subscription charged at ₹5 (likely USD $5 = ~₹415 at current rates) — confirm the exact INR debit amount and whether you actively use the platform; if not, cancel to save ~₹415–₹500/month."
   ],
   "category_insights": [
     {
@@ -66,10 +66,10 @@
     },
     {
       "category": "Food & Dining",
-      "this_month": 8443.75,
+      "this_month": 9008.75,
       "last_month": 5150.84,
-      "avg_3m": 7234.73,
-      "change_pct": 63.9
+      "avg_3m": 7423.06,
+      "change_pct": 74.9
     },
     {
       "category": "Others",
@@ -148,8 +148,8 @@
     },
     {
       "merchant": "Blinkit",
-      "total": 4416.0,
-      "count": 2
+      "total": 4981.0,
+      "count": 3
     },
     {
       "merchant": "Zomato",

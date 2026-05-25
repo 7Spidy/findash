@@ -1,5 +1,17 @@
 [
   {
+    "id": "89e9c1a325975793",
+    "date": "2026-05-25",
+    "amount": 565.0,
+    "type": "debit",
+    "account": "ICICI_CC",
+    "description": "BLINKIT",
+    "merchant": "Blinkit",
+    "category": "Food & Dining",
+    "raw_source": "sms_forward",
+    "currency": "INR"
+  },
+  {
     "id": "525f9599c371d390",
     "date": "2026-05-24",
     "amount": 730.0,
