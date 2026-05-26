@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-05-25",
+  "generated_at": "2026-05-26",
   "alerts": [
     {
       "type": "spike",
-      "title": "Others Category Exploded by 1,484%",
-      "description": "The 'Others' category jumped from ₹45,029.74 last month to ₹7,13,211.98 this month — an increase of ₹6,68,182.24. The top contributor is an obfuscated UPI merchant '❗ You Have Done A Upi Txn. Check Detail' accounting for ₹4,69,909.89 across 47 transactions, which warrants immediate review for potential fraud or miscategorisation.",
+      "title": "Others Category Exploded 1,484% This Month",
+      "description": "The 'Others' category surged from ₹45,029.74 last month to ₹7,13,331.98 this month — a 1,484% increase. The bulk of this is driven by unclassified UPI transactions (₹4,69,909.89 across 47 transactions) and a suspicious ₹99,999 entry labelled 'View: Account Update For Your HDFC Bank'.",
       "estimated_saving": 0
     },
     {
       "type": "large_single",
-      "title": "Suspicious ₹99,999 Single Transaction to HDFC Account Update",
-      "description": "A single payment of ₹99,999 was made to 'View: Account Update For Your Hdfc Bank', which is a common phishing/fraud descriptor pattern. This transaction should be verified immediately with your bank as it may be unauthorised.",
+      "title": "Suspicious ₹99,999 HDFC Bank 'Account Update' Transaction",
+      "description": "A single ₹99,999 payment to 'View: Account Update For Your HDFC Bank' was made this month with only 1 occurrence. This phrasing is a common pattern in UPI phishing and bank fraud scams — verify this transaction immediately with HDFC Bank.",
       "estimated_saving": 99999
     },
     {
       "type": "spike",
-      "title": "Food & Dining Up 75% — Zomato and Blinkit Driving Costs",
-      "description": "Food & Dining rose from ₹5,150.84 to ₹9,008.75 this month (+74.9%). Zomato alone accounted for ₹4,027.75 across 5 orders and Blinkit added ₹4,981 across 3 orders — together totalling ₹9,008.75, nearly the entire category spend.",
-      "estimated_saving": 2500
+      "title": "Food & Dining Jumped 75% Over Last Month",
+      "description": "Food & Dining spending rose from ₹5,150.84 to ₹9,008.75 this month, driven by Zomato (₹4,027.75 across 5 orders) and Blinkit (₹4,981 across 3 orders). This is also 21% above your 3-month average of ₹7,423.06.",
+      "estimated_saving": 2000
     },
     {
       "type": "spike",
-      "title": "Shopping Spiked 169% with ₹13,830 Spent",
-      "description": "Shopping jumped from ₹5,130.99 last month to ₹13,830.56 this month, well above the 3-month average of ₹14,596.67. Amazon Pay E-Commerce (₹6,004) and Amazon Pay India (₹1,960) together contributed ₹7,964 — review if these were planned purchases.",
-      "estimated_saving": 3000
+      "title": "Shopping Spend Up 169% With a ₹6,004 Single Amazon Transaction",
+      "description": "Shopping rose from ₹5,130.99 to ₹13,830.56 this month, significantly above your 3-month average of ₹14,596.67. A single ₹6,004 Amazon Pay e-commerce transaction accounts for a large portion — confirm this was intentional.",
+      "estimated_saving": 0
     }
   ],
   "subscriptions": [
@@ -50,11 +50,11 @@
     }
   ],
   "tips": [
-    "Immediately contact HDFC Bank to verify the ₹99,999 transaction to 'View: Account Update For Your Hdfc Bank' — this merchant name matches known UPI phishing patterns and may be fraudulent.",
-    "Audit the 47 UPI transactions totalling ₹4,69,909.89 flagged under '❗ You Have Done A Upi Txn. Check Detail' — recategorise them to understand true spending and identify any unauthorised payments.",
-    "You spent ₹4,027.75 on 5 Zomato orders this month (avg ₹805/order) — cooking at home just 2 of those meals could save approximately ₹1,500–₹1,800/month based on your current order value.",
-    "Blinkit spend of ₹4,981 across only 3 orders averages ₹1,660/order — consolidating quick-commerce orders to once a week and switching to a planned Amazon Fresh or supermarket visit can reduce impulse grocery spends by 20–30%, saving roughly ₹1,000–₹1,500/month.",
-    "Review the Medium Monthly subscription charged at ₹5 (likely USD $5 = ~₹415 at current rates) — confirm the exact INR debit amount and whether you actively use the platform; if not, cancel to save ~₹415–₹500/month."
+    "Audit the 47 unclassified UPI transactions totalling ₹4,69,909.89 immediately — tag or categorise each one so your actual spending picture is visible; currently over 96% of this month's total is unaccounted for.",
+    "Dispute or verify the ₹99,999 'Account Update For Your HDFC Bank' payment — legitimate banks never request payments via UPI for account updates; if fraudulent, file a complaint at cybercrime.gov.in and with HDFC within 24 hours.",
+    "Your Zomato and Blinkit combined spend was ₹9,008.75 this month against a 3-month Food & Dining average of ₹7,423.06. Setting a monthly cap of ₹6,500 on these two apps alone could save you ₹2,500+ per month.",
+    "You made 3 separate Amazon Pay transactions (₹6,004 + ₹1,960 + ₹5,866.56 across grocery) totalling ₹13,830.56 this month. Consolidating orders and using Amazon Subscribe & Save for grocery staples could reduce this by 10–15%, saving approximately ₹1,300 monthly.",
+    "Your Entertainment spend dropped to just ₹505 this month versus a 3-month average of ₹2,188.43 — yet you still have a Google Play subscription at ₹429/month. Review active Google Play subscriptions to ensure you are not paying for apps you are no longer using, as your Entertainment usage is at its lowest in 3 months."
   ],
   "category_insights": [
     {
@@ -73,10 +73,10 @@
     },
     {
       "category": "Others",
-      "this_month": 713211.98,
+      "this_month": 713331.98,
       "last_month": 45029.74,
-      "avg_3m": 262155.56,
-      "change_pct": 1483.9
+      "avg_3m": 262195.56,
+      "change_pct": 1484.1
     },
     {
       "category": "Shopping",
