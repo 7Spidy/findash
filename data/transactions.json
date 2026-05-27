@@ -1,5 +1,17 @@
 [
   {
+    "id": "74c45bd877f8fc96",
+    "date": "2026-05-27",
+    "amount": 26.0,
+    "type": "debit",
+    "account": "HDFC",
+    "description": "Mr RAVIND DUBEY",
+    "merchant": "Mr Ravind Dubey",
+    "category": "Others",
+    "raw_source": "email_alert",
+    "currency": "INR"
+  },
+  {
     "id": "614e07026c3b6a68",
     "date": "2026-05-26",
     "amount": 120.0,
@@ -7,6 +19,18 @@
     "account": "HDFC",
     "description": "MANOJ KUMAR KAILASHNATH KANOJIA",
     "merchant": "Manoj Kumar Kailashnath Kanojia",
+    "category": "Others",
+    "raw_source": "email_alert",
+    "currency": "INR"
+  },
+  {
+    "id": "a0ce356da1f66103",
+    "date": "2026-05-26",
+    "amount": 27.0,
+    "type": "debit",
+    "account": "HDFC",
+    "description": "PAPPU RAMKHILAVAN SAH",
+    "merchant": "Pappu Ramkhilavan Sah",
     "category": "Others",
     "raw_source": "email_alert",
     "currency": "INR"
