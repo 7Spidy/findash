@@ -1,125 +1,101 @@
-import { getAccountsData, getCreditCardsData, getInsightsData, getLastUpdated, getTransactions } from "@/lib/server-data";
-import { formatINR, deltaArrow, buildMonthlyFlow } from "@/lib/data";
-import DashboardShell from "@/components/DashboardShell";
-import GlassCard, { StatCard } from "@/components/GlassCard";
-import CashflowChart from "@/components/CashflowChart";
-import SpendingDonut from "@/components/SpendingDonut";
-import TransactionTable from "@/components/TransactionTable";
-import type { Category } from "@/types";
+'use client'
 
-export const revalidate = 300;
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAppState } from '@/context/AppContext'
+import UploadZone from '@/components/upload/UploadZone'
+import Header from '@/components/dashboard/Header'
+import NetFlowCard from '@/components/dashboard/NetFlowCard'
+import CCHealthCard from '@/components/dashboard/CCHealthCard'
+import AccountBalanceCard from '@/components/dashboard/AccountBalanceCard'
+import CategoryDonut from '@/components/dashboard/CategoryDonut'
+import MonthlyBarChart from '@/components/dashboard/MonthlyBarChart'
+import CategoryTable from '@/components/dashboard/CategoryTable'
+import InsightCard from '@/components/dashboard/InsightCard'
+import StatementExplorer from '@/components/dashboard/StatementExplorer'
 
-function getTimeOfDay(): string {
-  const h = new Date().getHours();
-  if (h < 12) return "morning";
-  if (h < 17) return "afternoon";
-  return "evening";
-}
+export default function Home() {
+  const { state } = useAppState()
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [filterCategory, setFilterCategory] = useState<string | null>(null)
+  const [filterMonth, setFilterMonth] = useState<string | null>(null)
 
-export default function OverviewPage() {
-  const accounts    = getAccountsData();
-  const cards       = getCreditCardsData();
-  const insights    = getInsightsData();
-  const lastUpdated = getLastUpdated();
-  const transactions = getTransactions();
+  const toggleTheme = () => {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    document.documentElement.setAttribute('data-theme', next)
+  }
 
-  const totalBalance = accounts.accounts.reduce((s, a) => s + a.balance, 0);
-  const totalCCSpend = cards.cards.reduce((s, c) => s + c.this_cycle_spend, 0);
-
-  // Derive MTD and last-month totals from transactions (pipeline only writes transactions.json)
-  const thisMonth = new Date().toISOString().slice(0, 7); // "YYYY-MM"
-  const lastMonthDate = new Date();
-  lastMonthDate.setMonth(lastMonthDate.getMonth() - 1);
-  const lastMonth = lastMonthDate.toISOString().slice(0, 7);
-
-  const totalIn      = transactions.filter(t => t.type === "credit" && t.date.startsWith(thisMonth)).reduce((s, t) => s + t.amount, 0);
-  const totalOut     = transactions.filter(t => t.type === "debit"  && t.date.startsWith(thisMonth)).reduce((s, t) => s + t.amount, 0);
-  const totalLastIn  = transactions.filter(t => t.type === "credit" && t.date.startsWith(lastMonth)).reduce((s, t) => s + t.amount, 0);
-  const totalLastOut = transactions.filter(t => t.type === "debit"  && t.date.startsWith(lastMonth)).reduce((s, t) => s + t.amount, 0);
-
-  const inDelta  = totalLastIn  > 0 ? ((totalIn  - totalLastIn)  / totalLastIn  * 100) : 0;
-  const outDelta = totalLastOut > 0 ? ((totalOut - totalLastOut) / totalLastOut * 100) : 0;
-
-  // Cashflow chart — aggregate HDFC transactions by month
-  const primaryFlow = buildMonthlyFlow(transactions.filter(t => t.account === "HDFC"));
-  const categoryMap: Record<string, number> = {};
-  transactions
-    .filter((t) => t.type === "debit" && t.date.startsWith(thisMonth))
-    .forEach((t) => { categoryMap[t.category] = (categoryMap[t.category] ?? 0) + t.amount; });
-  const categoryData = Object.entries(categoryMap)
-    .map(([cat, amt]) => ({ category: cat as Category, amount: Math.round(amt) }))
-    .sort((a, b) => b.amount - a.amount);
-
-  const recentTxns = transactions.slice(0, 8);
+  const isDashboard = state.analysis_status === 'done'
 
   return (
-    <DashboardShell lastUpdated={lastUpdated.timestamp}>
-      <div className="mb-8">
-        <h1 className="heading text-3xl font-bold text-gray-800 tracking-tight">
-          Good {getTimeOfDay()}, Avi
-        </h1>
-        <p className="text-gray-400 mt-1 text-sm">
-          Financial overview for{" "}
-          {new Date().toLocaleString("en-IN", { month: "long", year: "numeric" })}
-        </p>
-      </div>
+    <AnimatePresence mode="wait">
+      {!isDashboard ? (
+        <motion.div
+          key="upload"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <UploadZone theme={theme} onThemeToggle={toggleTheme} />
+        </motion.div>
+      ) : (
+        <motion.div
+          key="dashboard"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.4 }}
+          className="min-h-screen"
+          style={{ background: 'var(--color-bg)' }}
+        >
+          <Header theme={theme} onThemeToggle={toggleTheme} />
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Total Balance"    value={formatINR(totalBalance, true)} sub="Across HDFC + ICICI" subColor="muted" delay={0} />
-        <StatCard label="Money In (MTD)"   value={formatINR(totalIn, true)}
-          sub={`${deltaArrow(inDelta)} ${Math.abs(inDelta).toFixed(1)}% vs last month`}
-          subColor={inDelta >= 0 ? "sage" : "rose"} delay={0.06} />
-        <StatCard label="Money Out (MTD)"  value={formatINR(totalOut, true)}
-          sub={`${deltaArrow(outDelta)} ${Math.abs(outDelta).toFixed(1)}% vs last month`}
-          subColor={outDelta <= 0 ? "sage" : "rose"} delay={0.12} />
-        <StatCard label="CC Spend (Cycle)" value={formatINR(totalCCSpend, true)}
-          sub={`${cards.cards.length} cards active`} subColor="amber" delay={0.18} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <GlassCard delay={0.24}>
-          <CashflowChart data={primaryFlow} title="HDFC Cashflow (6 months)" />
-        </GlassCard>
-        <GlassCard delay={0.30}>
-          <h3 className="heading text-sm font-semibold text-gray-500 uppercase tracking-widest mb-4">
-            Spend by Category — This Month
-          </h3>
-          {categoryData.length > 0
-            ? <SpendingDonut data={categoryData} />
-            : <p className="text-gray-400 text-sm">No spend data yet this month.</p>}
-        </GlassCard>
-      </div>
-
-      {insights.alerts.length > 0 && (
-        <GlassCard delay={0.36} className="mb-8">
-          <h3 className="heading text-sm font-semibold text-gray-500 uppercase tracking-widest mb-4">
-            AI Spend Alerts
-          </h3>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {insights.alerts.slice(0, 3).map((alert, i) => (
-              <div key={i} className="p-4 rounded-xl bg-amber-50/60 border border-amber-100">
-                <div className="font-semibold text-sm text-gray-800 mb-1">{alert.title}</div>
-                <div className="text-xs text-gray-500 leading-relaxed line-clamp-2">{alert.description}</div>
-                {alert.estimated_saving ? (
-                  <div className="text-xs font-semibold text-amber-600 mt-2">
-                    Save {formatINR(alert.estimated_saving)}/mo
-                  </div>
-                ) : null}
+          <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+            {/* Section 1 — Hero */}
+            <section>
+              <NetFlowCard />
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                <CCHealthCard />
+                <AccountBalanceCard />
               </div>
-            ))}
-          </div>
-        </GlassCard>
+            </section>
+
+            {/* Section 2 — Spend Analytics */}
+            <section>
+              <h2 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--color-text-muted)' }}>
+                Spend Analytics
+              </h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+                <CategoryDonut onCategorySelect={setFilterCategory} />
+                <MonthlyBarChart onMonthSelect={setFilterMonth} />
+              </div>
+              <CategoryTable
+                filterCategory={filterCategory}
+                filterMonth={filterMonth}
+                onFilterClear={() => { setFilterCategory(null); setFilterMonth(null) }}
+              />
+            </section>
+
+            {/* Section 3 — AI Insights */}
+            <section>
+              <h2 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--color-text-muted)' }}>
+                AI Insights
+              </h2>
+              <InsightCard />
+            </section>
+
+            {/* Section 4 — Statement Explorer */}
+            <section>
+              <h2 className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: 'var(--color-text-muted)' }}>
+                Statement Explorer
+              </h2>
+              <StatementExplorer />
+            </section>
+          </main>
+        </motion.div>
       )}
-
-      <GlassCard delay={0.42} hover={false}>
-        <TransactionTable transactions={recentTxns} title="Recent Transactions" showSearch={false} showFilters={false} />
-        <div className="mt-4 text-center">
-          <a href="/transactions" className="text-sm text-sage-600 font-semibold hover:text-sage-700">
-            View all transactions →
-          </a>
-        </div>
-      </GlassCard>
-    </DashboardShell>
-  );
+    </AnimatePresence>
+  )
 }
-
