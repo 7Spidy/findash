@@ -1,138 +1,83 @@
-// ─── Core transaction type ───────────────────────────────────────────────────
+export type AccountType = 'savings' | 'credit_card'
 
-export type TransactionType = "credit" | "debit";
-
-export type Account = "HDFC" | "ICICI";
-
-export type CreditCard = "SBI_CC" | "ICICI_CC";
-
-export type Source =
-  | "HDFC"
-  | "ICICI"
-  | "SBI_CC"
-  | "ICICI_CC";
-
-export type RawSource =
-  | "email_alert"
-  | "sms_forward"
-  | "bank_statement"
-  | "cc_statement";
-
-export type Category =
-  | "Food & Dining"
-  | "Transport"
-  | "Shopping"
-  | "Entertainment"
-  | "Health & Fitness"
-  | "Subscriptions"
-  | "Utilities"
-  | "Transfers"
-  | "Others";
+export interface RawStatement {
+  file_name: string
+  extracted_text: string
+  password_used: boolean
+}
 
 export interface Transaction {
-  id: string;
-  date: string;           // ISO date string "YYYY-MM-DD"
-  amount: number;
-  type: TransactionType;
-  account: Source;
-  description: string;
-  merchant: string;
-  category: Category;
-  raw_source: RawSource;
-  currency: "INR";
-  upi_ref?: string;       // UPI reference ID if available
+  id: string
+  txn_date: string
+  description: string
+  merchant_name: string
+  amount: number
+  txn_type: 'credit' | 'debit'
+  category: string
+  subcategory: string
+  category_source: 'auto' | 'manual' | 'ai'
+  is_cc_bill_payment: boolean
+  notes: string
 }
 
-// ─── Account summary ─────────────────────────────────────────────────────────
-
-export interface MonthlyFlow {
-  month: string;          // "2026-04"
-  credit: number;
-  debit: number;
-  net: number;
+export interface SavingsSummary {
+  opening_balance: number
+  closing_balance: number
+  total_credits: number
+  total_debits: number
 }
 
-export interface AccountSummary {
-  id: Account;
-  name: string;
-  balance: number;
-  as_of: string;          // ISO date
-  this_month_credit: number;
-  this_month_debit: number;
-  last_month_credit: number;
-  last_month_debit: number;
-  monthly_flow: MonthlyFlow[];
-  recent_transactions: string[];  // transaction IDs, latest 10
+export interface CCSummary {
+  credit_limit: number
+  total_outstanding: number
+  minimum_due: number
+  due_date: string
+  cashback_earned: number
+  rewards_points: number
+  total_credits: number
+  total_debits: number
 }
 
-export interface AccountsData {
-  accounts: AccountSummary[];
-  last_updated: string;
+export interface ParsedStatement {
+  id: string
+  file_name: string
+  account_type: AccountType
+  bank: string
+  account_label: string
+  period_start: string
+  period_end: string
+  statement_month: number
+  statement_year: number
+  summary: SavingsSummary | CCSummary
+  transactions: Transaction[]
+  parse_status: 'success' | 'partial' | 'failed'
 }
 
-// ─── Credit card summary ─────────────────────────────────────────────────────
+export type InsightType =
+  | 'subscription'
+  | 'anomaly'
+  | 'trend'
+  | 'savings_tip'
+  | 'cc_health'
 
-export interface CreditCardSummary {
-  id: CreditCard;
-  name: string;
-  bank: string;
-  credit_limit: number;
-  outstanding: number;
-  minimum_due: number;
-  total_due: number;
-  due_date: string;       // ISO date
-  statement_date: string;
-  this_cycle_spend: number;
-  last_cycle_spend: number;
-  utilization_pct: number;
-  monthly_spend: MonthlyFlow[];
+export interface AIInsight {
+  id: string
+  insight_type: InsightType
+  title: string
+  body: string
+  severity: 'info' | 'warning' | 'critical'
+  is_discretionary: boolean
+  related_merchant: string
+  related_amount: number
+  period_start: string
+  period_end: string
+  dismissed: boolean
 }
 
-export interface CreditCardsData {
-  cards: CreditCardSummary[];
-  last_updated: string;
-}
-
-// ─── Insights (AI-generated) ─────────────────────────────────────────────────
-
-export interface SpendAlert {
-  type: "unused_subscription" | "spike" | "duplicate" | "large_single";
-  title: string;
-  description: string;
-  estimated_saving?: number;
-}
-
-export interface Subscription {
-  name: string;
-  amount: number;
-  frequency: "monthly" | "quarterly" | "annual";
-  last_charged: string;
-  category: Category;
-}
-
-export interface CategoryInsight {
-  category: Category;
-  this_month: number;
-  last_month: number;
-  avg_3m: number;
-  change_pct: number;
-}
-
-export interface InsightsData {
-  generated_at: string;
-  alerts: SpendAlert[];
-  subscriptions: Subscription[];
-  tips: string[];
-  category_insights: CategoryInsight[];
-  top_merchants: { merchant: string; total: number; count: number }[];
-}
-
-// ─── Last updated metadata ───────────────────────────────────────────────────
-
-export interface LastUpdated {
-  timestamp: string;
-  emails_fetched: number;
-  transactions_added: number;
-  parse_errors: number;
-  pipeline_version: string;
+export interface AppState {
+  raw_statements: RawStatement[]
+  parsed_statements: ParsedStatement[]
+  insights: AIInsight[]
+  analysis_status: 'idle' | 'extracting' | 'analysing' | 'done' | 'error'
+  error_message: string
 }
