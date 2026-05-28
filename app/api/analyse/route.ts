@@ -39,10 +39,28 @@ Flag is_discretionary=true for entertainment OTT, gaming, lifestyle SaaS. Severi
 
 Spend data:`
 
+function repairTruncatedJSON(str: string): Record<string, unknown> | null {
+  // Walk backwards from truncation point, try to close the JSON at each '}'
+  const searchStart = Math.max(0, str.length - 1000)
+  for (let i = str.length - 1; i >= searchStart; i--) {
+    if (str[i] === '}') {
+      // The transactions array is the last field, so we need to close it with ]}
+      for (const suffix of [']}', ']', '']) {
+        try {
+          const candidate = str.slice(0, i + 1) + suffix
+          const result = JSON.parse(candidate)
+          if (result && typeof result === 'object') return result as Record<string, unknown>
+        } catch { /* keep trying */ }
+      }
+    }
+  }
+  return null
+}
+
 async function parseStatement(statement: RawStatement): Promise<ParsedStatement> {
   const response = await client.messages.create({
     model: 'claude-sonnet-4-20250514',
-    max_tokens: 8000,
+    max_tokens: 16000,
     messages: [
       {
         role: 'user',
@@ -52,16 +70,32 @@ async function parseStatement(statement: RawStatement): Promise<ParsedStatement>
   })
 
   const raw = response.content[0].type === 'text' ? response.content[0].text : '{}'
-  let parsed
+
+  // Strip markdown code fences if Claude added them despite the prompt
+  let jsonStr = raw.trim()
+  const codeBlock = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/)
+  if (codeBlock) jsonStr = codeBlock[1].trim()
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let parsed: any = null
+
   try {
-    parsed = JSON.parse(raw.trim())
+    parsed = JSON.parse(jsonStr)
   } catch {
-    const jsonMatch = raw.match(/\{[\s\S]*\}/)
+    const jsonMatch = jsonStr.match(/\{[\s\S]*/)
     if (jsonMatch) {
-      parsed = JSON.parse(jsonMatch[0])
-    } else {
-      throw new Error('Failed to parse Claude response as JSON')
+      const candidate = jsonMatch[0]
+      try {
+        parsed = JSON.parse(candidate)
+      } catch {
+        // Response was likely truncated at max_tokens — repair by closing the last complete transaction
+        parsed = repairTruncatedJSON(candidate)
+      }
     }
+  }
+
+  if (!parsed) {
+    throw new Error(`Failed to parse statement JSON. Raw response (first 300 chars): ${raw.slice(0, 300)}`)
   }
 
   const id = nanoid()
