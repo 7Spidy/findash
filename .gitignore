@@ -35,3 +35,6 @@ data/raw/
 # OS
 .DS_Store
 Thumbs.db
+
+# TypeScript build info
+tsconfig.tsbuildinfo
