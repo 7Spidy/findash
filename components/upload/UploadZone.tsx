@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useCallback } from 'react'
-import { Upload, X, Check, AlertTriangle } from 'lucide-react'
+import { Upload, X, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppState } from '@/context/AppContext'
 import { extractPdfText, PasswordRequiredError } from '@/lib/pdf-extractor'
@@ -16,13 +16,6 @@ interface FileEntry {
   passwordUsed?: boolean
 }
 
-const ACCENT_COLORS = [
-  { value: '#7B3F00', label: 'Chocolate Brown' },
-  { value: '#D97706', label: 'Amber' },
-  { value: '#1E40AF', label: 'Blue' },
-  { value: '#166534', label: 'Green' },
-]
-
 const BANKS = ['HDFC Bank', 'ICICI Bank', 'State Bank', 'Axis Bank', 'Kotak', 'AMEX']
 
 const FEATURES = [
@@ -36,16 +29,9 @@ export default function UploadZone() {
   const { state, dispatch } = useAppState()
   const [files, setFiles] = useState<FileEntry[]>([])
   const [isDragging, setIsDragging] = useState(false)
-  const [tweaksOpen, setTweaksOpen] = useState(true)
-  const [accentColor, setAccentColor] = useState('#7B3F00')
   const [howItWorksOpen, setHowItWorksOpen] = useState(false)
   const [privacyOpen, setPrivacyOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const applyAccent = (color: string) => {
-    setAccentColor(color)
-    document.documentElement.style.setProperty('--color-accent', color)
-  }
 
   const processFile = useCallback(async (file: File, password?: string) => {
     const update = (patch: Partial<FileEntry>) => {
@@ -239,9 +225,11 @@ export default function UploadZone() {
           </motion.div>
 
           {/* Password warning */}
-          <p className="mt-3 text-xs text-center flex items-center justify-center gap-1.5" style={{ color: 'var(--color-text-muted)' }}>
-            <AlertTriangle size={12} style={{ color: 'var(--color-amber)', flexShrink: 0 }} />
-            Statement must <strong style={{ color: 'var(--color-text)' }}>not</strong> be password-protected — download directly from your bank&apos;s app.
+          <p className="mt-3 text-xs text-center leading-relaxed" style={{ color: 'var(--color-text-muted)' }}>
+            <AlertTriangle size={12} className="inline align-middle mr-1" style={{ color: 'var(--color-amber)' }} />
+            Statement must{' '}
+            <strong className="font-semibold" style={{ color: 'var(--color-text)' }}>not</strong>
+            {' '}be password-protected — download directly from your bank&apos;s app.
           </p>
 
           {/* Bank chips */}
@@ -330,52 +318,6 @@ export default function UploadZone() {
           </div>
         ))}
       </footer>
-
-      {/* ── Tweaks panel ─────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {tweaksOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 16, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
-            transition={{ duration: 0.2 }}
-            className="fixed bottom-20 right-4 rounded-2xl border shadow-lg p-4 w-56 z-50"
-            style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Tweaks</span>
-              <button onClick={() => setTweaksOpen(false)} style={{ color: 'var(--color-text-muted)' }}>
-                <X size={14} />
-              </button>
-            </div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-muted)' }}>Theme</p>
-            <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>Accent colour</p>
-            <div className="flex gap-2">
-              {ACCENT_COLORS.map((c) => (
-                <button
-                  key={c.value}
-                  onClick={() => applyAccent(c.value)}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform hover:scale-105"
-                  style={{ background: c.value }}
-                  title={c.label}
-                >
-                  {accentColor === c.value && <Check size={14} color="#fff" strokeWidth={3} />}
-                </button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {!tweaksOpen && (
-        <button
-          onClick={() => setTweaksOpen(true)}
-          className="fixed bottom-20 right-4 text-xs px-3 py-1.5 rounded-full border z-50"
-          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
-        >
-          Tweaks
-        </button>
-      )}
 
       {/* ── How it works modal ───────────────────────────────────────── */}
       <AnimatePresence>
