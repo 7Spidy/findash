@@ -9,7 +9,7 @@ import {
 import { useAppState } from '@/context/AppContext'
 import { formatINR } from '@/lib/utils'
 
-const ACCOUNT_COLORS = ['#14b8a6', '#3b82f6', '#a855f7', '#f97316', '#22c55e']
+const ACCOUNT_COLORS = ['#7B3F00', '#2563EB', '#A855F7', '#EA580C', '#059669']
 
 const CATEGORY_COLORS: Record<string, string> = {
   'Food & Dining':  '#f97316',
@@ -18,7 +18,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Entertainment':  '#ec4899',
   'Subscriptions':  '#6366f1',
   'Utilities':      '#eab308',
-  'Travel':         '#14b8a6',
+  'Travel':         '#0EA5E9',
   'Investments':    '#22c55e',
   'Health':         '#ef4444',
   'Others':         '#6b7280',
@@ -107,21 +107,21 @@ export default function MonthlyBarChart({ onMonthSelect }: MonthlyBarChartProps)
       <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={chartData} onClick={(d) => d?.activePayload && handleBarClick(d.activePayload[0].payload)}>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-            <XAxis dataKey="displayMonth" tick={{ fill: '#888', fontSize: 11 }} axisLine={false} tickLine={false} />
-            <YAxis tickFormatter={yAxisFormatter} tick={{ fill: '#888', fontSize: 10 }} axisLine={false} tickLine={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E6E0D4" />
+            <XAxis dataKey="displayMonth" tick={{ fill: '#6B7280', fontSize: 11 }} axisLine={false} tickLine={false} />
+            <YAxis tickFormatter={yAxisFormatter} tick={{ fill: '#6B7280', fontSize: 10 }} axisLine={false} tickLine={false} />
             <Tooltip
               contentStyle={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: '#fff',
+                border: '1px solid #E6E0D4',
                 borderRadius: 10,
                 fontSize: 12,
-                color: '#f5f5f5',
+                color: '#0F172A',
               }}
-              labelStyle={{ color: '#888', fontSize: 11 }}
-              itemStyle={{ color: '#f5f5f5' }}
+              labelStyle={{ color: '#6B7280', fontSize: 11 }}
+              itemStyle={{ color: '#0F172A' }}
               formatter={(v: number) => formatINR(v)}
-              cursor={{ fill: 'rgba(255,255,255,0.07)' }}
+              cursor={{ fill: 'rgba(123,63,0,0.04)' }}
             />
             <Legend
               formatter={(v) => <span style={{ color: 'var(--color-text-muted)', fontSize: 11 }}>{v}</span>}

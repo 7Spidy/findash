@@ -13,7 +13,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   'Entertainment':  '#ec4899',
   'Subscriptions':  '#6366f1',
   'Utilities':      '#eab308',
-  'Travel':         '#14b8a6',
+  'Travel':         '#0EA5E9',
   'Investments':    '#22c55e',
   'Health':         '#ef4444',
   'Others':         '#6b7280',
@@ -90,14 +90,14 @@ export default function CategoryDonut({ onCategorySelect }: CategoryDonutProps) 
             </Pie>
             <Tooltip
               contentStyle={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255,255,255,0.08)',
+                background: '#fff',
+                border: '1px solid #E6E0D4',
                 borderRadius: 10,
                 fontSize: 12,
-                color: '#f5f5f5',
+                color: '#0F172A',
               }}
-              labelStyle={{ color: '#888', fontSize: 11 }}
-              itemStyle={{ color: '#f5f5f5' }}
+              labelStyle={{ color: '#6B7280', fontSize: 11 }}
+              itemStyle={{ color: '#0F172A' }}
               formatter={(value: number, name: string) => [
                 `${formatINR(value)} (${data.find((d) => d.name === name)?.pct}%)`,
                 name,

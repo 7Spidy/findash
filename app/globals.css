@@ -3,36 +3,23 @@
 @tailwind utilities;
 
 /* ─── Design tokens ─────────────────────────────────────────────────────────*/
-:root,
-[data-theme="dark"] {
-  --color-bg:           #0f0f0f;
-  --color-surface:      #1a1a1a;
-  --color-surface-2:    #242424;
-  --color-border:       rgba(255, 255, 255, 0.08);
-  --color-text:         #f5f5f5;
-  --color-text-muted:   #888888;
-  --color-accent:       #14b8a6;
-  --color-green:        #22c55e;
-  --color-red:          #ef4444;
-  --color-amber:        #f59e0b;
-  --color-orange:       #f97316;
+:root {
+  --color-bg:           #FAF8F3;
+  --color-surface:      #FFFFFF;
+  --color-surface-2:    #F3F0E9;
+  --color-border:       #E6E0D4;
+  --color-text:         #0F172A;
+  --color-text-muted:   #6B7280;
+  --color-accent:       #7B3F00;
+  --color-green:        #059669;
+  --color-red:          #DC2626;
+  --color-amber:        #D97706;
+  --color-orange:       #EA580C;
+  --color-blue:         #2563EB;
+  --font-serif:         'Playfair Display', Georgia, serif;
   --radius-xl:          16px;
   --radius-md:          8px;
   --radius-full:        9999px;
-}
-
-[data-theme="light"] {
-  --color-bg:           #f5f7fa;
-  --color-surface:      #ffffff;
-  --color-surface-2:    #f0f2f5;
-  --color-border:       rgba(0, 0, 0, 0.08);
-  --color-text:         #111827;
-  --color-text-muted:   #6b7280;
-  --color-accent:       #0d9488;
-  --color-green:        #16a34a;
-  --color-red:          #dc2626;
-  --color-amber:        #d97706;
-  --color-orange:       #ea580c;
 }
 
 /* ─── Base reset ─────────────────────────────────────────────────────────────*/
@@ -49,7 +36,7 @@ body {
   min-height: 100dvh;
   background: var(--color-bg);
   color: var(--color-text);
-  font-family: 'DM Sans', 'Inter', sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────*/
@@ -71,8 +58,21 @@ body {
   pointer-events: none;
   user-select: none;
   font-weight: 700;
-  color: #14b8a6;
+  color: var(--color-accent);
   animation: currencyFall linear infinite;
+}
+
+/* ─── Progress bar animation ────────────────────────────────────────────────*/
+@keyframes progressFill {
+  0%   { width: 0%; }
+  40%  { width: 55%; }
+  70%  { width: 75%; }
+  90%  { width: 88%; }
+  100% { width: 95%; }
+}
+
+.progress-bar-fill {
+  animation: progressFill 8s ease-out forwards;
 }
 
 /* ─── Recharts overrides ─────────────────────────────────────────────────────*/
