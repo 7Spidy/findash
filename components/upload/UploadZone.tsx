@@ -1,7 +1,7 @@
 'use client'
 
-import { useRef, useState, useCallback, useMemo } from 'react'
-import { Upload, Plus, ArrowRight } from 'lucide-react'
+import { useRef, useState, useCallback } from 'react'
+import { Upload, X, Check, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppState } from '@/context/AppContext'
 import { extractPdfText, PasswordRequiredError } from '@/lib/pdf-extractor'
@@ -16,39 +16,45 @@ interface FileEntry {
   passwordUsed?: boolean
 }
 
-const CURRENCY_SYMBOLS = ['$', '₹', '£', '€', '$', '₹', '¥', '€']
+const ACCENT_COLORS = [
+  { value: '#7B3F00', label: 'Chocolate Brown' },
+  { value: '#D97706', label: 'Amber' },
+  { value: '#1E40AF', label: 'Blue' },
+  { value: '#166534', label: 'Green' },
+]
+
+const BANKS = ['HDFC Bank', 'ICICI Bank', 'State Bank', 'Axis Bank', 'Kotak', 'AMEX']
+
+const FEATURES = [
+  { icon: '🔒', title: 'Zero storage', desc: 'Parsed in your browser' },
+  { icon: '⚡', title: 'Instant results', desc: 'AI insights in seconds' },
+  { icon: '🤖', title: 'Claude AI', desc: 'Smart pattern analysis' },
+  { icon: '🇮🇳', title: 'Indian banks', desc: 'HDFC, ICICI, SBI & more' },
+]
 
 export default function UploadZone() {
   const { state, dispatch } = useAppState()
   const [files, setFiles] = useState<FileEntry[]>([])
   const [isDragging, setIsDragging] = useState(false)
+  const [tweaksOpen, setTweaksOpen] = useState(true)
+  const [accentColor, setAccentColor] = useState('#7B3F00')
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false)
+  const [privacyOpen, setPrivacyOpen] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const particles = useMemo(() =>
-    Array.from({ length: 26 }, (_, i) => ({
-      id: i,
-      symbol: CURRENCY_SYMBOLS[i % CURRENCY_SYMBOLS.length],
-      left: `${(i * 3.9 + 1.5) % 97}%`,
-      fontSize: `${15 + (i % 6) * 4}px`,
-      opacity: 0.04 + (i % 5) * 0.018,
-      duration: `${8 + (i % 9) * 1.6}s`,
-      delay: `${-(i * 1.9)}s`,
-    })), [])
+  const applyAccent = (color: string) => {
+    setAccentColor(color)
+    document.documentElement.style.setProperty('--color-accent', color)
+  }
 
   const processFile = useCallback(async (file: File, password?: string) => {
     const update = (patch: Partial<FileEntry>) => {
       setFiles((prev) => prev.map((f) => f.file.name === file.name ? { ...f, ...patch } : f))
     }
-
     update({ status: 'extracting' })
     try {
       const result = await extractPdfText(file, password)
-      update({
-        status: 'ready',
-        pageCount: result.pageCount,
-        extractedText: result.text,
-        passwordUsed: result.passwordUsed,
-      })
+      update({ status: 'ready', pageCount: result.pageCount, extractedText: result.text, passwordUsed: result.passwordUsed })
     } catch (err) {
       if (err instanceof PasswordRequiredError) {
         update({ status: 'password_required' })
@@ -65,9 +71,7 @@ export default function UploadZone() {
       const names = new Set(prev.map((e) => e.file.name))
       return [...prev, ...entries.filter((e) => !names.has(e.file.name))]
     })
-    for (const f of pdfs) {
-      await processFile(f)
-    }
+    for (const f of pdfs) await processFile(f)
   }, [processFile])
 
   const handleDrop = useCallback((e: React.DragEvent) => {
@@ -75,14 +79,6 @@ export default function UploadZone() {
     setIsDragging(false)
     addFiles(Array.from(e.dataTransfer.files))
   }, [addFiles])
-
-  const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) addFiles(Array.from(e.target.files))
-  }
-
-  const handlePasswordSubmit = async (file: File, password: string) => {
-    await processFile(file, password)
-  }
 
   const handleRemove = (name: string) => {
     const idx = state.raw_statements.findIndex((s) => s.file_name === name)
@@ -94,133 +90,172 @@ export default function UploadZone() {
 
   const handleAnalyse = async () => {
     if (readyFiles.length === 0) return
-
     const statements = readyFiles.map((f) => ({
       file_name: f.file.name,
       extracted_text: f.extractedText ?? '',
       password_used: f.passwordUsed ?? false,
     }))
-
     dispatch({ type: 'SET_ANALYSIS_STATUS', payload: 'analysing' })
-
     try {
       const res = await fetch('/api/analyse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ statements }),
       })
-
       if (!res.ok) {
         const err = await res.json()
         dispatch({ type: 'SET_ERROR', payload: err.error ?? 'Analysis failed' })
         return
       }
-
-      const data = await res.json()
-      dispatch({ type: 'SET_PARSED_DATA', payload: data })
+      dispatch({ type: 'SET_PARSED_DATA', payload: await res.json() })
     } catch (err) {
       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : 'Network error' })
     }
   }
 
   return (
-    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
 
-      {/* Currency rain */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
-        {particles.map((p) => (
-          <span
-            key={p.id}
-            className="currency-particle"
+      {/* ── Header ───────────────────────────────────────────────────── */}
+      <header
+        className="flex items-center justify-between px-8 py-5 border-b"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
+        <span className="text-xl font-bold tracking-tight" style={{ color: 'var(--color-text)' }}>
+          Spend<span style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-accent)', fontStyle: 'italic' }}>Dash</span>
+        </span>
+        <nav className="flex items-center gap-6">
+          <button
+            onClick={() => setHowItWorksOpen(true)}
+            className="text-sm transition-opacity hover:opacity-70"
+            style={{ color: 'var(--color-text)' }}
+          >
+            How it works
+          </button>
+          <button
+            onClick={() => setPrivacyOpen(true)}
+            className="text-sm transition-opacity hover:opacity-70"
+            style={{ color: 'var(--color-text)' }}
+          >
+            Privacy
+          </button>
+        </nav>
+      </header>
+
+      {/* ── Main ─────────────────────────────────────────────────────── */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-12">
+
+        {/* Announcement badge */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex items-center gap-2 px-4 py-1.5 rounded-full border text-sm mb-8"
+          style={{
+            borderColor: 'var(--color-border)',
+            background: 'var(--color-surface)',
+            color: 'var(--color-text-muted)',
+          }}
+        >
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: 'var(--color-accent)' }} />
+          New: ICICI credit card statements now supported
+        </motion.div>
+
+        {/* Hero heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.05 }}
+          className="text-center mb-4"
+        >
+          <h1
+            className="font-bold leading-tight"
             style={{
-              left: p.left,
-              fontSize: p.fontSize,
-              ['--p-opacity' as string]: p.opacity,
-              opacity: 0,
-              animationDuration: p.duration,
-              animationDelay: p.delay,
+              fontFamily: 'var(--font-serif)',
+              fontSize: 'clamp(2.8rem, 6vw, 5rem)',
+              color: 'var(--color-text)',
+              lineHeight: 1.1,
             }}
           >
-            {p.symbol}
-          </span>
-        ))}
-      </div>
+            Your money,
+          </h1>
+          <h1
+            className="font-bold italic leading-tight"
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontSize: 'clamp(2.8rem, 6vw, 5rem)',
+              color: 'var(--color-accent)',
+              lineHeight: 1.15,
+            }}
+          >
+            clearly.
+          </h1>
+        </motion.div>
 
-      {/* Header */}
-      <div className="relative z-10 flex items-center justify-between p-6">
-        <span
-          className="text-2xl font-bold italic"
-          style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-accent)' }}
+        {/* Subtitle */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.15 }}
+          className="text-center text-base max-w-md mb-10 leading-relaxed"
+          style={{ color: 'var(--color-text-muted)' }}
         >
-          SpendDash
-        </span>
-      </div>
+          Drop your Indian bank or credit card PDFs. AI-powered analysis
+          — parsed privately in your browser, never uploaded anywhere.
+        </motion.p>
 
-      {/* Main content */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-24">
+        {/* Upload zone */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="w-full max-w-2xl"
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="w-full max-w-lg"
         >
-          <div className="text-center mb-10">
-            <h1
-              className="text-4xl md:text-5xl font-bold italic mb-3 leading-tight"
-              style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
-            >
-              Understand your money
-            </h1>
-            <p className="text-base" style={{ color: 'var(--color-text-muted)' }}>
-              Upload Indian bank or credit card PDFs — parsed privately, never stored.
-            </p>
-          </div>
-
-          {/* Drop zone */}
           <motion.div
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
             animate={isDragging
-              ? { borderColor: '#7B3F00', boxShadow: '0 0 0 8px rgba(123,63,0,0.10)' }
-              : {
-                  borderColor: '#E6E0D4',
-                  boxShadow: [
-                    '0 0 0 0px rgba(123,63,0,0)',
-                    '0 0 0 8px rgba(123,63,0,0.06)',
-                    '0 0 0 0px rgba(123,63,0,0)',
-                  ],
-                }
+              ? { borderColor: 'var(--color-accent)', boxShadow: '0 0 0 6px rgba(123,63,0,0.08)' }
+              : { borderColor: 'var(--color-border)', boxShadow: '0 0 0 0px rgba(123,63,0,0)' }
             }
-            transition={isDragging
-              ? { duration: 0.2 }
-              : { boxShadow: { duration: 3, repeat: Infinity, ease: 'easeInOut' }, borderColor: { duration: 0.2 } }
-            }
-            className="relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center"
-            style={{
-              background: isDragging ? 'rgba(123,63,0,0.04)' : 'var(--color-surface)',
-            }}
+            transition={{ duration: 0.2 }}
+            className="cursor-pointer rounded-2xl border-2 border-dashed p-10 text-center transition-colors"
+            style={{ background: isDragging ? 'rgba(123,63,0,0.03)' : 'var(--color-surface)' }}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf"
-              multiple
-              className="hidden"
-              onChange={handleFileInput}
-            />
-            <Upload
-              className="mx-auto mb-4"
-              size={36}
-              style={{ color: isDragging ? '#7B3F00' : 'var(--color-text-muted)' }}
-            />
-            <p className="text-lg font-medium" style={{ color: 'var(--color-text)' }}>
-              Drag & drop PDF statements here
+            <input ref={fileInputRef} type="file" accept=".pdf" multiple className="hidden" onChange={(e) => { if (e.target.files) addFiles(Array.from(e.target.files)) }} />
+            <Upload className="mx-auto mb-3" size={28} style={{ color: 'var(--color-text-muted)' }} />
+            <p className="text-base font-semibold" style={{ color: 'var(--color-text)' }}>
+              Drag & drop your PDF statements
             </p>
             <p className="mt-1 text-sm" style={{ color: 'var(--color-text-muted)' }}>
-              or click to browse — multiple files supported
+              or{' '}
+              <span className="underline underline-offset-2 cursor-pointer" style={{ color: 'var(--color-accent)' }}>
+                click to browse
+              </span>
+              {' '}— multiple files supported
             </p>
           </motion.div>
+
+          {/* Password warning */}
+          <p className="mt-3 text-xs text-center flex items-center justify-center gap-1.5" style={{ color: 'var(--color-text-muted)' }}>
+            <AlertTriangle size={12} style={{ color: 'var(--color-amber)', flexShrink: 0 }} />
+            Statement must <strong style={{ color: 'var(--color-text)' }}>not</strong> be password-protected — download directly from your bank&apos;s app.
+          </p>
+
+          {/* Bank chips */}
+          <div className="flex flex-wrap justify-center gap-2 mt-4">
+            {BANKS.map((bank) => (
+              <span
+                key={bank}
+                className="text-xs px-3 py-1 rounded-full border"
+                style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)', background: 'var(--color-surface)' }}
+              >
+                {bank}
+              </span>
+            ))}
+          </div>
 
           {/* File cards */}
           <AnimatePresence>
@@ -235,14 +270,14 @@ export default function UploadZone() {
                     key={entry.file.name}
                     entry={entry}
                     onRemove={() => handleRemove(entry.file.name)}
-                    onPasswordSubmit={(pwd) => handlePasswordSubmit(entry.file, pwd)}
+                    onPasswordSubmit={(pwd) => processFile(entry.file, pwd)}
                   />
                 ))}
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Error message */}
+          {/* Error */}
           {state.analysis_status === 'error' && (
             <motion.div
               initial={{ opacity: 0 }}
@@ -253,39 +288,168 @@ export default function UploadZone() {
               {state.error_message}
             </motion.div>
           )}
+
+          {/* Analyse button */}
+          <AnimatePresence>
+            {readyFiles.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
+                className="mt-6 flex justify-center"
+              >
+                <button
+                  onClick={handleAnalyse}
+                  className="px-8 py-3 rounded-xl text-sm font-semibold transition-all hover:opacity-90 active:scale-95"
+                  style={{ background: 'var(--color-accent)', color: '#fff' }}
+                >
+                  Analyse {readyFiles.length} statement{readyFiles.length !== 1 ? 's' : ''} →
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
-      </div>
+      </main>
 
-      {/* Footer */}
-      <div className="relative z-10 py-4 text-center text-xs" style={{ color: 'var(--color-text-muted)' }}>
-        Made with ❤️ by Avi
-      </div>
+      {/* ── Bottom feature strip ──────────────────────────────────────── */}
+      <footer
+        className="border-t grid grid-cols-2 sm:grid-cols-4"
+        style={{ borderColor: 'var(--color-border)' }}
+      >
+        {FEATURES.map((f, i) => (
+          <div
+            key={f.title}
+            className="flex items-center gap-3 px-6 py-4"
+            style={{ borderLeft: i > 0 ? `1px solid var(--color-border)` : undefined }}
+          >
+            <span className="text-xl">{f.icon}</span>
+            <div>
+              <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{f.title}</p>
+              <p className="text-xs" style={{ color: 'var(--color-text-muted)' }}>{f.desc}</p>
+            </div>
+          </div>
+        ))}
+      </footer>
 
-      {/* Bottom action bar */}
+      {/* ── Tweaks panel ─────────────────────────────────────────────── */}
       <AnimatePresence>
-        {readyFiles.length > 0 && (
+        {tweaksOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-0 left-0 right-0 flex items-center justify-center gap-4 p-5 border-t z-20"
+            initial={{ opacity: 0, y: 16, scale: 0.97 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 16, scale: 0.97 }}
+            transition={{ duration: 0.2 }}
+            className="fixed bottom-20 right-4 rounded-2xl border shadow-lg p-4 w-56 z-50"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-colors"
-              style={{ borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>Tweaks</span>
+              <button onClick={() => setTweaksOpen(false)} style={{ color: 'var(--color-text-muted)' }}>
+                <X size={14} />
+              </button>
+            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--color-text-muted)' }}>Theme</p>
+            <p className="text-xs mb-2" style={{ color: 'var(--color-text-muted)' }}>Accent colour</p>
+            <div className="flex gap-2">
+              {ACCENT_COLORS.map((c) => (
+                <button
+                  key={c.value}
+                  onClick={() => applyAccent(c.value)}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-transform hover:scale-105"
+                  style={{ background: c.value }}
+                  title={c.label}
+                >
+                  {accentColor === c.value && <Check size={14} color="#fff" strokeWidth={3} />}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {!tweaksOpen && (
+        <button
+          onClick={() => setTweaksOpen(true)}
+          className="fixed bottom-20 right-4 text-xs px-3 py-1.5 rounded-full border z-50"
+          style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)', color: 'var(--color-text-muted)' }}
+        >
+          Tweaks
+        </button>
+      )}
+
+      {/* ── How it works modal ───────────────────────────────────────── */}
+      <AnimatePresence>
+        {howItWorksOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(15,23,42,0.4)' }}
+            onClick={() => setHowItWorksOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-2xl border p-8 max-w-md w-full"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              <Plus size={16} /> Add More
-            </button>
-            <button
-              onClick={handleAnalyse}
-              disabled={readyFiles.length === 0}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
-              style={{ background: 'var(--color-accent)', color: '#fff' }}
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>How it works</h2>
+                <button onClick={() => setHowItWorksOpen(false)} style={{ color: 'var(--color-text-muted)' }}><X size={18} /></button>
+              </div>
+              <ol className="space-y-4">
+                {[
+                  { n: '1', t: 'Download your statement', d: 'Get the PDF directly from your bank\'s app or website.' },
+                  { n: '2', t: 'Drop it here', d: 'Your PDF is read entirely in your browser — nothing is uploaded.' },
+                  { n: '3', t: 'AI analyses it', d: 'Claude AI categorises transactions and surfaces insights.' },
+                  { n: '4', t: 'Explore your dashboard', d: 'Charts, trends, and actionable tips — all from your real data.' },
+                ].map((s) => (
+                  <li key={s.n} className="flex gap-4">
+                    <span className="w-7 h-7 rounded-full flex-shrink-0 flex items-center justify-center text-xs font-bold text-white" style={{ background: 'var(--color-accent)' }}>{s.n}</span>
+                    <div>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--color-text)' }}>{s.t}</p>
+                      <p className="text-xs mt-0.5" style={{ color: 'var(--color-text-muted)' }}>{s.d}</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Privacy modal ────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {privacyOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(15,23,42,0.4)' }}
+            onClick={() => setPrivacyOpen(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="rounded-2xl border p-8 max-w-md w-full"
+              style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
             >
-              Analyse <ArrowRight size={16} />
-            </button>
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>Privacy</h2>
+                <button onClick={() => setPrivacyOpen(false)} style={{ color: 'var(--color-text-muted)' }}><X size={18} /></button>
+              </div>
+              <div className="space-y-4 text-sm" style={{ color: 'var(--color-text-muted)' }}>
+                <p><strong style={{ color: 'var(--color-text)' }}>Your data never leaves your device.</strong> PDF text is extracted entirely in your browser using PDF.js.</p>
+                <p>The extracted text is sent to Claude AI (Anthropic) for categorisation and insight generation. No raw PDF is ever uploaded.</p>
+                <p>No account required. No cookies. No analytics. Nothing is stored after your session ends.</p>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
