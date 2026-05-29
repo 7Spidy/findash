@@ -6,21 +6,23 @@ import type { RawStatement, ParsedStatement, AIInsight, Transaction } from '@/ty
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
 
-const PARSE_PROMPT = `You are a financial statement parser for Indian bank and credit card statements. Extract all data from the following statement text and return ONLY valid JSON. No explanation, no markdown, no code blocks — raw JSON only.
+const PARSE_PROMPT = `You are a financial statement parser for Indian bank and credit card statements. Extract all data and return ONLY valid JSON. No explanation, no markdown, no code blocks — raw JSON only.
 
-Auto-detect whether this is a savings/current account or a credit card statement. Auto-detect the bank name and account type from the content. Pick the statement period (period_start, period_end) directly from the statement.
+Auto-detect account type (savings or credit_card), bank name, and period from the statement content.
 
 For savings/current account statements return:
-{"account_type":"savings","bank":"","account_label":"","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","statement_month":0,"statement_year":0,"summary":{"opening_balance":0.0,"closing_balance":0.0,"total_credits":0.0,"total_debits":0.0},"transactions":[{"txn_date":"YYYY-MM-DD","description":"","merchant_name":"","amount":0.0,"txn_type":"credit|debit","is_cc_bill_payment":false}]}
+{"account_type":"savings","bank":"HDFC Bank","account_label":"HDFC Savings Account","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","statement_month":0,"statement_year":0,"summary":{"opening_balance":0.0,"closing_balance":0.0,"total_credits":0.0,"total_debits":0.0},"transactions":[{"txn_date":"YYYY-MM-DD","description":"","merchant_name":"","amount":0.0,"txn_type":"credit|debit","is_cc_bill_payment":false,"category":"Others"}]}
 
 For credit card statements return:
-{"account_type":"credit_card","bank":"","account_label":"","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","statement_month":0,"statement_year":0,"summary":{"credit_limit":0.0,"total_outstanding":0.0,"minimum_due":0.0,"due_date":"YYYY-MM-DD","cashback_earned":0.0,"rewards_points":0,"total_credits":0.0,"total_debits":0.0},"transactions":[{"txn_date":"YYYY-MM-DD","description":"","merchant_name":"","amount":0.0,"txn_type":"credit|debit","is_cc_bill_payment":false}]}
+{"account_type":"credit_card","bank":"HDFC Bank","account_label":"HDFC Credit Card","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","statement_month":0,"statement_year":0,"summary":{"credit_limit":0.0,"total_outstanding":0.0,"minimum_due":0.0,"due_date":"YYYY-MM-DD","cashback_earned":0.0,"rewards_points":0,"total_credits":0.0,"total_debits":0.0},"transactions":[{"txn_date":"YYYY-MM-DD","description":"","merchant_name":"","amount":0.0,"txn_type":"credit|debit","is_cc_bill_payment":false,"category":"Others"}]}
 
 Rules:
-- merchant_name: clean normalised name (e.g. "SWIGGY*12345MUMBAI" → "Swiggy")
-- is_cc_bill_payment: true ONLY on savings transactions where description suggests paying a credit card bill (keywords: "credit card", "CC bill", "NACH", "bill payment to")
-- All amounts as positive floats
-- If a field is not found in the statement, use null
+- bank: Find the issuing bank name from the statement header, logo text, or footer. Common Indian banks: "HDFC Bank", "SBI", "ICICI Bank", "Axis Bank", "Kotak Mahindra Bank", "Yes Bank", "IndusInd Bank", "RBL Bank", "AU Small Finance Bank", "Federal Bank". For SBI Card statements use "SBI". Never leave bank as empty string — infer from context.
+- account_label: Descriptive label — savings: "HDFC Bank Savings", "ICICI Bank Current"; credit cards: "HDFC Credit Card", "SBI SimplyCLICK Card", "Axis Bank Flipkart Card". Use the card product name if visible.
+- merchant_name: Normalised clean name (e.g. "SWIGGY*12345MUMBAI" → "Swiggy", "AMZN Mktp IN" → "Amazon", "POS ZOMATO" → "Zomato", "UPI-PHONEPE" → "PhonePe", "IRCTC RAIL" → "IRCTC")
+- category: Use your knowledge to categorise each transaction. Choose ONE from: "Food & Dining", "Transport", "Shopping", "Entertainment", "Subscriptions", "Utilities", "Travel", "Investments", "Health", "Others". Use "Others" only when the merchant is truly unidentifiable.
+- is_cc_bill_payment: true ONLY on savings transactions paying a credit card bill (keywords: "credit card", "CC bill", "NACH", "bill payment to")
+- All amounts as positive floats. If a field is not found, use null.
 - Return ONLY the JSON object`
 
 const INSIGHTS_PROMPT = `You are a personal finance advisor analysing spending data for a user in India. The data covers one or more bank/credit card statements. Analyse the spend summary below and return a JSON array of insight objects. Return ONLY valid JSON — no explanation, no markdown.
@@ -109,8 +111,15 @@ async function parseStatement(statement: RawStatement): Promise<ParsedStatement>
     amount: number
     txn_type: 'credit' | 'debit'
     is_cc_bill_payment: boolean
+    category?: string
   }) => {
-    const { category, subcategory } = categorize(txn.merchant_name ?? txn.description ?? '')
+    // Prefer Claude's category if it's a known non-Others value;
+    // fall back to regex for subcategory and as a category backup.
+    const claudeCategory = typeof txn.category === 'string' && txn.category !== 'Others' ? txn.category : null
+    const regexResult = categorize(txn.merchant_name ?? txn.description ?? '')
+    const category = claudeCategory ?? regexResult.category
+    const subcategory = regexResult.subcategory !== 'General' ? regexResult.subcategory : 'General'
+    const category_source = claudeCategory ? 'ai' as const : 'auto' as const
     return {
       id: nanoid(),
       txn_date: txn.txn_date ?? '',
@@ -120,7 +129,7 @@ async function parseStatement(statement: RawStatement): Promise<ParsedStatement>
       txn_type: txn.txn_type ?? 'debit',
       category,
       subcategory,
-      category_source: 'auto' as const,
+      category_source,
       is_cc_bill_payment: txn.is_cc_bill_payment ?? false,
       notes: '',
     }
