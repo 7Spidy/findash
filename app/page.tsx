@@ -5,14 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useAppState } from '@/context/AppContext'
 import UploadZone from '@/components/upload/UploadZone'
 import Header from '@/components/dashboard/Header'
-import NetFlowCard from '@/components/dashboard/NetFlowCard'
+import OverviewTab from '@/components/dashboard/OverviewTab'
+import TransactionView from '@/components/dashboard/TransactionView'
 import CCHealthCard from '@/components/dashboard/CCHealthCard'
 import AccountBalanceCard from '@/components/dashboard/AccountBalanceCard'
-import CategoryDonut from '@/components/dashboard/CategoryDonut'
-import MonthlyBarChart from '@/components/dashboard/MonthlyBarChart'
-import CategoryTable from '@/components/dashboard/CategoryTable'
 import InsightCard from '@/components/dashboard/InsightCard'
-import StatementExplorer from '@/components/dashboard/StatementExplorer'
 
 type Tab = 'overview' | 'transactions' | 'cards' | 'insights'
 
@@ -148,37 +145,15 @@ export default function Home() {
           <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
             <AnimatePresence mode="wait">
               {activeTab === 'overview' && (
-                <motion.div
-                  key="overview"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                  className="space-y-6"
-                >
-                  <NetFlowCard />
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <CategoryDonut onCategorySelect={setFilterCategory} />
-                    <MonthlyBarChart onMonthSelect={setFilterMonth} />
-                  </div>
-                  <StatementExplorer />
-                </motion.div>
+                <OverviewTab />
               )}
 
               {activeTab === 'transactions' && (
-                <motion.div
-                  key="transactions"
-                  initial={{ opacity: 0, y: 8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.25 }}
-                >
-                  <CategoryTable
-                    filterCategory={filterCategory}
-                    filterMonth={filterMonth}
-                    onFilterClear={() => { setFilterCategory(null); setFilterMonth(null) }}
-                  />
-                </motion.div>
+                <TransactionView
+                  filterCategory={filterCategory}
+                  filterMonth={filterMonth}
+                  onFilterClear={() => { setFilterCategory(null); setFilterMonth(null) }}
+                />
               )}
 
               {activeTab === 'cards' && (

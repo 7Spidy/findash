@@ -184,7 +184,7 @@ export default function CategoryTable({ filterCategory, filterMonth, onFilterCle
           {filterCategory && (
             <span
               className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 cursor-pointer"
-              style={{ background: 'rgba(20,184,166,0.12)', color: 'var(--color-accent)' }}
+              style={{ background: 'rgba(123,63,0,0.10)', color: 'var(--color-accent)' }}
               onClick={onFilterClear}
             >
               {filterCategory} <X size={10} />
@@ -193,7 +193,7 @@ export default function CategoryTable({ filterCategory, filterMonth, onFilterCle
           {filterMonth && (
             <span
               className="text-xs px-2.5 py-1 rounded-full flex items-center gap-1.5 cursor-pointer"
-              style={{ background: 'rgba(20,184,166,0.12)', color: 'var(--color-accent)' }}
+              style={{ background: 'rgba(123,63,0,0.10)', color: 'var(--color-accent)' }}
               onClick={onFilterClear}
             >
               {filterMonth} <X size={10} />
