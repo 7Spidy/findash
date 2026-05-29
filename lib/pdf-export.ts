@@ -56,7 +56,7 @@ export async function exportPDF(
 
   doc.setFontSize(32)
   doc.setTextColor(20, 184, 166)
-  doc.text('FinDash', pageW / 2, 80, { align: 'center' })
+  doc.text('Spend Dash', pageW / 2, 80, { align: 'center' })
 
   doc.setFontSize(14)
   doc.setTextColor(245, 245, 245)
@@ -245,5 +245,5 @@ export async function exportPDF(
     ? `${allDates[0]}_${allDates[allDates.length - 1]}`
     : allDates[0] ?? 'report'
 
-  doc.save(`findash-report-${periodStr}.pdf`)
+  doc.save(`spend-dash-report-${periodStr}.pdf`)
 }

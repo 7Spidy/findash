@@ -3,7 +3,7 @@ import './globals.css'
 import { AppProvider } from '@/context/AppContext'
 
 export const metadata: Metadata = {
-  title: 'FinDash — Personal Finance',
+  title: 'Spend Dash — Personal Finance',
   description: 'Drop your bank statements. Get financial clarity instantly.',
   robots: 'noindex, nofollow',
 }

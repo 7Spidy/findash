@@ -217,7 +217,7 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
       {/* Header */}
       <div className="relative z-10 flex items-center justify-between p-6">
         <span className="text-2xl font-bold" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-accent)' }}>
-          FinDash
+          Spend Dash
         </span>
         <button
           onClick={onThemeToggle}

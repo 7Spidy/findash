@@ -1,4 +1,4 @@
-# FinDash — Personal Financial Dashboard
+# Spend Dash — Personal Financial Dashboard
 
 A self-hosted financial dashboard that auto-updates daily from your Gmail (HDFC, ICICI bank alerts and PDF statements, SBI and ICICI credit cards).
 

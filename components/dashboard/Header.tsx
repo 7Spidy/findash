@@ -40,7 +40,7 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
           className="text-2xl font-bold"
           style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-accent)' }}
         >
-          FinDash
+          Spend Dash
         </span>
         {getPeriodLabel() && (
           <span className="text-sm hidden sm:block" style={{ color: 'var(--color-text-muted)' }}>

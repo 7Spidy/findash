@@ -59,12 +59,15 @@ function repairTruncatedJSON(str: string): Record<string, unknown> | null {
 
 async function parseStatement(statement: RawStatement): Promise<ParsedStatement> {
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 16000,
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 10000,
     messages: [
       {
         role: 'user',
-        content: `${PARSE_PROMPT}\n\nStatement text:\n${statement.extracted_text.slice(0, 80000)}`,
+        content: [
+          { type: 'text', text: PARSE_PROMPT, cache_control: { type: 'ephemeral' } },
+          { type: 'text', text: `Statement text:\n${statement.extracted_text.slice(0, 40000)}` },
+        ],
       },
     ],
   })
@@ -186,12 +189,15 @@ async function generateInsights(statements: ParsedStatement[]): Promise<AIInsigh
   const spendSummary = buildSpendSummary(statements)
 
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-20250514',
+    model: 'claude-sonnet-4-6',
     max_tokens: 4000,
     messages: [
       {
         role: 'user',
-        content: `${INSIGHTS_PROMPT}\n${JSON.stringify(spendSummary, null, 2)}`,
+        content: [
+          { type: 'text', text: INSIGHTS_PROMPT, cache_control: { type: 'ephemeral' } },
+          { type: 'text', text: JSON.stringify(spendSummary, null, 2) },
+        ],
       },
     ],
   })
