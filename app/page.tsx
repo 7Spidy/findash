@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppState } from '@/context/AppContext'
 import UploadZone from '@/components/upload/UploadZone'
@@ -24,68 +24,53 @@ const TABS: { id: Tab; label: string }[] = [
 ]
 
 const ANALYSIS_STEPS = [
-  'Reading your statements…',
-  'Categorising transactions…',
+  'Reading your statement…',
+  'Identifying categories…',
   'Generating AI insights…',
-  'Building your dashboard…',
+  'Almost ready…',
 ]
 
 function AnalysingScreen() {
+  const [progress, setProgress] = useState(0)
+  const [stepIdx, setStepIdx] = useState(0)
+  const rafRef = useRef<number>(0)
+
+  useEffect(() => {
+    const start = Date.now()
+    const duration = 25000
+    const tick = () => {
+      const pct = Math.min((Date.now() - start) / duration * 100, 95)
+      setProgress(pct)
+      setStepIdx(Math.min(Math.floor(pct / 26), 3))
+      if (pct < 95) rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center px-6"
-      style={{ background: 'var(--color-bg)' }}
-    >
-      <motion.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-sm text-center"
-      >
-        <p
-          className="text-2xl font-bold italic mb-2"
-          style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
-        >
-          Analysing your statement
-        </p>
-        <p className="text-sm mb-10" style={{ color: 'var(--color-text-muted)' }}>
-          This usually takes 15–30 seconds
-        </p>
-
-        {/* Progress bar */}
-        <div
-          className="w-full h-1.5 rounded-full overflow-hidden mb-8"
-          style={{ background: 'var(--color-border)' }}
-        >
-          <div
-            className="h-full rounded-full progress-bar-fill"
-            style={{ background: 'var(--color-accent)' }}
-          />
+    <div style={{
+      width: '100vw', height: '100vh', background: '#FAF8F3',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', fontFamily: "'DM Sans', sans-serif", padding: '0 24px',
+    }}>
+      <span style={{
+        fontFamily: "'Playfair Display', serif", fontWeight: 700,
+        fontSize: 24, color: '#0F172A', marginBottom: 52, letterSpacing: '-0.01em',
+      }}>
+        Spend<em style={{ fontStyle: 'italic' }}>Dash</em>
+      </span>
+      <div style={{ width: '100%', maxWidth: 340 }}>
+        <div style={{ height: 3, background: '#E6E0D4', borderRadius: 2, marginBottom: 20, overflow: 'hidden' }}>
+          <div style={{ height: 3, width: `${progress}%`, background: '#7B3F00', borderRadius: 2, transition: 'width 0.08s linear' }} />
         </div>
-
-        {/* Step indicators */}
-        <div className="space-y-3">
-          {ANALYSIS_STEPS.map((step, i) => (
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: -8 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: i * 2, duration: 0.4 }}
-              className="flex items-center gap-3"
-            >
-              <motion.div
-                className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                initial={{ background: 'var(--color-border)' }}
-                animate={{ background: 'var(--color-accent)' }}
-                transition={{ delay: i * 2, duration: 0.3 }}
-              />
-              <span className="text-sm" style={{ color: 'var(--color-text-muted)' }}>
-                {step}
-              </span>
-            </motion.div>
-          ))}
+        <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', textAlign: 'center', marginBottom: 10 }}>
+          {ANALYSIS_STEPS[stepIdx]}
         </div>
-      </motion.div>
+        <p style={{ fontSize: 12.5, color: '#9CA3AF', textAlign: 'center', lineHeight: 1.7, margin: 0 }}>
+          Your data is processed entirely in your browser.<br />Nothing is sent to any server.
+        </p>
+      </div>
     </div>
   )
 }
