@@ -30,7 +30,7 @@ export default function AccountBalanceCard() {
             <div className="flex items-center gap-2 mb-3">
               <span
                 className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{ background: 'rgba(20,184,166,0.12)', color: 'var(--color-accent)' }}
+                style={{ background: 'rgba(123,63,0,0.10)', color: 'var(--color-accent)' }}
               >
                 {stmt.bank}
               </span>
@@ -42,7 +42,7 @@ export default function AccountBalanceCard() {
             <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-muted)' }}>
               {stmt.account_label}
             </p>
-            <p className="text-3xl font-bold mb-2" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-text)' }}>
+            <p className="text-3xl font-bold mb-2" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>
               {formatINR(s.closing_balance ?? 0)}
             </p>
 

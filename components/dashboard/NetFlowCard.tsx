@@ -121,7 +121,7 @@ export default function NetFlowCard() {
         {/* Column A */}
         <div>
           <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>{colA.label}</p>
-          <p className="text-2xl font-bold" style={{ fontFamily: 'Instrument Serif, serif', color: colA.color }}>
+          <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: colA.color }}>
             {formatINR(animA)}
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function NetFlowCard() {
         {/* Column B */}
         <div>
           <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>{colB.label}</p>
-          <p className="text-2xl font-bold" style={{ fontFamily: 'Instrument Serif, serif', color: colB.color }}>
+          <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: colB.color }}>
             {formatINR(animB)}
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function NetFlowCard() {
                 ? <TrendingUp  size={18} style={{ color: 'var(--color-accent)' }} />
                 : <TrendingDown size={18} style={{ color: 'var(--color-red)' }} />
             )}
-            <p className="text-2xl font-bold" style={{ fontFamily: 'Instrument Serif, serif', color: colC.color }}>
+            <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: colC.color }}>
               {!ccOnly && netSaved < 0 ? '−' : ''}{formatINR(animC)}
             </p>
           </div>
@@ -157,13 +157,14 @@ export default function NetFlowCard() {
               <Line
                 type="monotone"
                 dataKey="value"
-                stroke={ccOnly ? '#ef4444' : netSaved >= 0 ? '#14b8a6' : '#ef4444'}
+                stroke={ccOnly ? '#DC2626' : netSaved >= 0 ? '#7B3F00' : '#DC2626'}
                 strokeWidth={2}
                 dot={false}
               />
               <Tooltip
-                contentStyle={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8 }}
-                labelStyle={{ color: '#888', fontSize: 10 }}
+                contentStyle={{ background: '#fff', border: '1px solid #E6E0D4', borderRadius: 8 }}
+                labelStyle={{ color: '#6B7280', fontSize: 10 }}
+                itemStyle={{ color: '#0F172A' }}
                 formatter={(v: number) => [formatINR(v), ccOnly ? 'Spend' : 'Net Saved']}
               />
             </LineChart>

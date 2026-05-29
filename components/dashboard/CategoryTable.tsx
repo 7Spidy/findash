@@ -262,7 +262,7 @@ export default function CategoryTable({ filterCategory, filterMonth, onFilterCle
                       </span>
                     </div>
                   </td>
-                  <td className="py-3 px-4 text-right text-sm font-semibold" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-text)' }}>
+                  <td className="py-3 px-4 text-right text-sm font-semibold" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>
                     {formatINR(cat.total)}
                   </td>
                   <td className="py-3 px-4 text-right text-xs" style={{ color: 'var(--color-text-muted)' }}>

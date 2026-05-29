@@ -1,15 +1,10 @@
 'use client'
 
-import { Moon, Sun, Download, RotateCcw } from 'lucide-react'
+import { Download, RotateCcw } from 'lucide-react'
 import { useAppState } from '@/context/AppContext'
 import { exportPDF } from '@/lib/pdf-export'
 
-interface HeaderProps {
-  theme: 'dark' | 'light'
-  onThemeToggle: () => void
-}
-
-export default function Header({ theme, onThemeToggle }: HeaderProps) {
+export default function Header() {
   const { state, dispatch } = useAppState()
 
   const allDates = state.parsed_statements
@@ -37,10 +32,10 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
     >
       <div className="flex items-center gap-4">
         <span
-          className="text-2xl font-bold"
-          style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-accent)' }}
+          className="text-2xl font-bold italic"
+          style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-accent)' }}
         >
-          Spend Dash
+          SpendDash
         </span>
         {getPeriodLabel() && (
           <span className="text-sm hidden sm:block" style={{ color: 'var(--color-text-muted)' }}>
@@ -72,14 +67,6 @@ export default function Header({ theme, onThemeToggle }: HeaderProps) {
         >
           <RotateCcw size={15} />
           <span className="hidden sm:inline">Start Over</span>
-        </button>
-
-        <button
-          onClick={onThemeToggle}
-          className="p-2 rounded-full transition-colors"
-          style={{ background: 'var(--color-surface)', color: 'var(--color-text-muted)' }}
-        >
-          {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
         </button>
       </div>
     </header>

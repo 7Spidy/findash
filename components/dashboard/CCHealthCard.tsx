@@ -20,7 +20,7 @@ function ArcGauge({ pct }: { pct: number }) {
       <path
         d={`M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`}
         fill="none"
-        stroke="rgba(255,255,255,0.08)"
+        stroke="#E6E0D4"
         strokeWidth={stroke}
         strokeLinecap="round"
       />
@@ -32,10 +32,10 @@ function ArcGauge({ pct }: { pct: number }) {
         strokeLinecap="round"
         strokeDasharray={`${filled} ${circumference}`}
       />
-      <text x={cx} y={cy - 2} textAnchor="middle" fontSize="14" fontWeight="bold" fill={color} fontFamily="Instrument Serif, serif">
+      <text x={cx} y={cy - 2} textAnchor="middle" fontSize="14" fontWeight="bold" fill={color} fontFamily="Playfair Display, serif">
         {pct.toFixed(0)}%
       </text>
-      <text x={cx} y={cy + 10} textAnchor="middle" fontSize="7" fill="#888">
+      <text x={cx} y={cy + 10} textAnchor="middle" fontSize="7" fill="#6B7280">
         utilisation
       </text>
     </svg>
@@ -83,7 +83,7 @@ export default function CCHealthCard() {
               <div>
                 <span
                   className="text-xs px-2 py-0.5 rounded-full font-medium"
-                  style={{ background: 'rgba(20,184,166,0.12)', color: 'var(--color-accent)' }}
+                  style={{ background: 'rgba(123,63,0,0.10)', color: 'var(--color-accent)' }}
                 >
                   {stmt.bank}
                 </span>
@@ -94,7 +94,7 @@ export default function CCHealthCard() {
               <ArcGauge pct={utilPct} />
             </div>
 
-            <p className="text-2xl font-bold mb-1" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-text)' }}>
+            <p className="text-2xl font-bold mb-1" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>
               {formatINR(s.total_outstanding ?? 0)}
             </p>
             <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
@@ -104,7 +104,7 @@ export default function CCHealthCard() {
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="rounded-xl p-3" style={{ background: 'var(--color-surface-2)' }}>
                 <p className="text-xs mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Min Due</p>
-                <p className="text-sm font-semibold" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-text)' }}>
+                <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>
                   {formatINR(s.minimum_due ?? 0)}
                 </p>
               </div>
@@ -124,7 +124,7 @@ export default function CCHealthCard() {
             {(s.cashback_earned > 0 || s.rewards_points > 0) && (
               <div className="flex gap-2 mb-4">
                 {s.cashback_earned > 0 && (
-                  <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'rgba(20,184,166,0.12)', color: 'var(--color-accent)' }}>
+                  <span className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ background: 'rgba(123,63,0,0.10)', color: 'var(--color-accent)' }}>
                     ₹{s.cashback_earned} cashback
                   </span>
                 )}

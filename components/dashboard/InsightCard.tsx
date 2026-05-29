@@ -10,7 +10,7 @@ const INSIGHT_STYLES: Record<string, { border: string; bg: string; icon: string 
   subscription: { border: '#f59e0b', bg: 'rgba(245,158,11,0.06)',  icon: '🔄' },
   anomaly:      { border: '#f97316', bg: 'rgba(249,115,22,0.06)',  icon: '🚨' },
   trend:        { border: '#3b82f6', bg: 'rgba(59,130,246,0.06)',  icon: '⚡' },
-  savings_tip:  { border: '#14b8a6', bg: 'rgba(20,184,166,0.06)', icon: '💡' },
+  savings_tip:  { border: '#2563EB', bg: 'rgba(37,99,235,0.06)',  icon: '💡' },
   cc_health:    { border: '#22c55e', bg: 'rgba(34,197,94,0.06)',   icon: '✅' },
 }
 
@@ -84,7 +84,7 @@ function SingleInsightCard({ insight }: { insight: AIInsight }) {
                     </>
                   )}
                   {insight.related_merchant && (
-                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(255,255,255,0.05)', color: 'var(--color-text-muted)' }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'var(--color-surface-2)', color: 'var(--color-text-muted)' }}>
                       {insight.related_merchant}
                     </span>
                   )}
