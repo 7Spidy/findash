@@ -239,23 +239,88 @@ export default function OverviewTab() {
   const activeInsights = state.insights.filter((i) => !i.dismissed).slice(0, 6)
 
   const hasSavings = filteredStmts.some((s) => s.account_type === 'savings')
-  const showNetSaved = hasSavings
 
-  const stats = [
-    { label: 'Total Spend',  value: formatINR(totalSpend, true),         color: 'var(--color-red)'                                          },
-    { label: 'Avg Daily',    value: formatINR(Math.round(avgDaily), true), color: 'var(--color-text)'                                        },
-    { label: 'Largest TXN', value: formatINR(largestTxn, true),           color: 'var(--color-text)'                                        },
+  // Largest txn merchant name for sub-text
+  const largestTxnMerchant = useMemo(() => {
+    if (filteredTxns.length === 0) return ''
+    const t = filteredTxns.reduce((m, c) => (c.amount > m.amount ? c : m), filteredTxns[0])
+    return t.merchant_name || t.description || ''
+  }, [filteredTxns])
+
+  // Month-over-month comparison for Total Spend (when multiple months exist)
+  const prevMonthSpend = useMemo(() => {
+    if (!selectedMonth || months.length < 2) return null
+    const idx = months.indexOf(selectedMonth)
+    if (idx <= 0) return null
+    const prevMonth = months[idx - 1]
+    const prevTxns = state.parsed_statements
+      .filter(
+        (s) =>
+          `${s.statement_year}-${String(s.statement_month).padStart(2, '0')}` === prevMonth
+      )
+      .flatMap((s) => s.transactions)
+      .filter((t) => !t.is_cc_bill_payment && t.txn_type === 'debit')
+    return prevTxns.reduce((sum, t) => sum + t.amount, 0)
+  }, [selectedMonth, months, state.parsed_statements])
+
+  const spendDeltaPct = prevMonthSpend != null && prevMonthSpend > 0
+    ? ((totalSpend - prevMonthSpend) / prevMonthSpend) * 100
+    : null
+
+  // Day span for avg daily sub-text
+  const daySpan = useMemo(() => {
+    const dates = filteredTxns.map((t) => t.txn_date).filter(Boolean).sort()
+    if (dates.length < 2) return null
+    return (
+      Math.ceil(
+        (new Date(dates[dates.length - 1]).getTime() - new Date(dates[0]).getTime()) / 86400000
+      ) + 1
+    )
+  }, [filteredTxns])
+
+  const topCategory = categoryData[0]?.name ?? ''
+
+  const stats: { label: string; value: string; color: string; sub?: string; subColor?: string }[] = [
     {
-      label: showNetSaved ? 'Net Saved' : 'Total TXNs',
-      value: showNetSaved
-        ? (netSaved >= 0 ? '+' : '−') + formatINR(Math.abs(netSaved), true)
-        : String(filteredTxns.length),
-      color: !showNetSaved
-        ? 'var(--color-text)'
-        : netSaved >= 0
-          ? 'var(--color-green)'
-          : 'var(--color-red)',
+      label: 'TOTAL SPEND',
+      value: formatINR(totalSpend),
+      color: 'var(--color-text)',
+      sub: spendDeltaPct != null
+        ? `${spendDeltaPct >= 0 ? '+' : ''}${spendDeltaPct.toFixed(1)}% vs prev month`
+        : topCategory ? `Top: ${topCategory}` : undefined,
+      subColor: spendDeltaPct != null
+        ? spendDeltaPct > 0 ? 'var(--color-red)' : 'var(--color-green)'
+        : 'var(--color-text-muted)',
     },
+    {
+      label: 'AVG. DAILY',
+      value: formatINR(Math.round(avgDaily)),
+      color: 'var(--color-text)',
+      sub: daySpan != null ? `over ${daySpan} days` : undefined,
+      subColor: 'var(--color-text-muted)',
+    },
+    {
+      label: 'LARGEST TXN',
+      value: formatINR(largestTxn),
+      color: 'var(--color-text)',
+      sub: largestTxnMerchant || undefined,
+      subColor: 'var(--color-text-muted)',
+    },
+    hasSavings
+      ? {
+          label: 'NET SAVED',
+          value: (netSaved >= 0 ? '+' : '−') + formatINR(Math.abs(netSaved)),
+          color: netSaved >= 0 ? 'var(--color-green)' : 'var(--color-red)',
+          sub: netSaved >= 0 ? '↑ Positive cash flow' : '↓ Spending > income',
+          subColor: netSaved >= 0 ? 'var(--color-green)' : 'var(--color-red)',
+        }
+      : {
+          label: 'TRANSACTIONS',
+          value: String(filteredTxns.length),
+          color: 'var(--color-text)',
+          sub: `across ${filteredStmts.length} statement${filteredStmts.length !== 1 ? 's' : ''}`,
+          subColor: 'var(--color-text-muted)',
+        },
   ]
 
   return (
@@ -320,24 +385,32 @@ export default function OverviewTab() {
 
       {/* 4 Stat chips */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {stats.map((stat) => (
+        {stats.map((stat, i) => (
           <motion.div
             key={stat.label}
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.2 }}
+            transition={{ duration: 0.2, delay: i * 0.05 }}
             className="rounded-2xl border p-4"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
-            <p className="text-xs mb-1.5" style={{ color: 'var(--color-text-muted)' }}>
+            <p
+              className="text-xs font-semibold tracking-wider mb-2"
+              style={{ color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}
+            >
               {stat.label}
             </p>
             <p
-              className="text-xl font-bold leading-none"
+              className="text-2xl font-bold leading-none mb-1.5"
               style={{ fontFamily: 'var(--font-serif)', color: stat.color }}
             >
               {stat.value}
             </p>
+            {stat.sub && (
+              <p className="text-xs truncate" style={{ color: stat.subColor ?? 'var(--color-text-muted)' }}>
+                {stat.sub}
+              </p>
+            )}
           </motion.div>
         ))}
       </div>
