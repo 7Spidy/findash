@@ -94,6 +94,10 @@ export default function Home() {
               <StatementExplorer />
             </section>
           </main>
+
+          <footer className="py-6 text-center text-xs" style={{ color: 'var(--color-text-muted)' }}>
+            Made with ❤️ by Avi
+          </footer>
         </motion.div>
       )}
     </AnimatePresence>

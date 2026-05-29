@@ -57,6 +57,24 @@ body {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 99px; }
 
+/* ─── Currency rain ──────────────────────────────────────────────────────────*/
+@keyframes currencyFall {
+  0%   { transform: translateY(-60px) rotate(-12deg); opacity: 0; }
+  8%   { opacity: var(--p-opacity); }
+  92%  { opacity: var(--p-opacity); }
+  100% { transform: translateY(110vh) rotate(20deg); opacity: 0; }
+}
+
+.currency-particle {
+  position: absolute;
+  top: 0;
+  pointer-events: none;
+  user-select: none;
+  font-weight: 700;
+  color: #14b8a6;
+  animation: currencyFall linear infinite;
+}
+
 /* ─── Recharts overrides ─────────────────────────────────────────────────────*/
 .recharts-tooltip-wrapper { outline: none !important; }
 .recharts-cartesian-axis-tick-value { font-size: 11px !important; }

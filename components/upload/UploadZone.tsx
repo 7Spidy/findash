@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useCallback } from 'react'
+import { useRef, useState, useCallback, useMemo } from 'react'
 import { Upload, Moon, Sun, Plus, ArrowRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAppState } from '@/context/AppContext'
@@ -21,6 +21,8 @@ interface UploadZoneProps {
   onThemeToggle: () => void
 }
 
+const CURRENCY_SYMBOLS = ['$', '₹', '£', '€', '$', '₹', '¥', '€']
+
 export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
   const { state, dispatch } = useAppState()
   const [files, setFiles] = useState<FileEntry[]>([])
@@ -35,6 +37,18 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
     'Generating insights...',
     'Building your dashboard...',
   ]
+
+  // Stable particles — generated once, varying positions/speeds/sizes
+  const particles = useMemo(() =>
+    Array.from({ length: 26 }, (_, i) => ({
+      id: i,
+      symbol: CURRENCY_SYMBOLS[i % CURRENCY_SYMBOLS.length],
+      left: `${(i * 3.9 + 1.5) % 97}%`,
+      fontSize: `${15 + (i % 6) * 4}px`,
+      opacity: 0.05 + (i % 5) * 0.028,
+      duration: `${8 + (i % 9) * 1.6}s`,
+      delay: `${-(i * 1.9)}s`,
+    })), [])
 
   const processFile = useCallback(async (file: File, password?: string) => {
     const update = (patch: Partial<FileEntry>) => {
@@ -178,9 +192,30 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg)' }}>
+    <div className="min-h-screen flex flex-col relative overflow-hidden" style={{ background: 'var(--color-bg)' }}>
+
+      {/* Currency rain */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+        {particles.map((p) => (
+          <span
+            key={p.id}
+            className="currency-particle"
+            style={{
+              left: p.left,
+              fontSize: p.fontSize,
+              ['--p-opacity' as string]: p.opacity,
+              opacity: 0,
+              animationDuration: p.duration,
+              animationDelay: p.delay,
+            }}
+          >
+            {p.symbol}
+          </span>
+        ))}
+      </div>
+
       {/* Header */}
-      <div className="flex items-center justify-between p-6">
+      <div className="relative z-10 flex items-center justify-between p-6">
         <span className="text-2xl font-bold" style={{ fontFamily: 'Instrument Serif, serif', color: 'var(--color-accent)' }}>
           FinDash
         </span>
@@ -194,7 +229,7 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
       </div>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4 pb-24">
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-4 pb-24">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -212,14 +247,28 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
             </p>
           </div>
 
-          {/* Drop zone */}
+          {/* Drop zone with slow outward pulse */}
           <motion.div
             onDragOver={(e) => { e.preventDefault(); setIsDragging(true) }}
             onDragLeave={() => setIsDragging(false)}
             onDrop={handleDrop}
             onClick={() => fileInputRef.current?.click()}
-            animate={{ borderColor: isDragging ? 'var(--color-accent)' : 'var(--color-border)' }}
-            className="relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center transition-all"
+            animate={isDragging
+              ? { borderColor: '#14b8a6', boxShadow: '0 0 0 8px rgba(20,184,166,0.18)' }
+              : {
+                  borderColor: 'rgba(255,255,255,0.08)',
+                  boxShadow: [
+                    '0 0 0 0px rgba(20,184,166,0)',
+                    '0 0 0 10px rgba(20,184,166,0.10)',
+                    '0 0 0 0px rgba(20,184,166,0)',
+                  ],
+                }
+            }
+            transition={isDragging
+              ? { duration: 0.2 }
+              : { boxShadow: { duration: 2.8, repeat: Infinity, ease: 'easeInOut' }, borderColor: { duration: 0.2 } }
+            }
+            className="relative cursor-pointer rounded-2xl border-2 border-dashed p-12 text-center"
             style={{
               background: isDragging ? 'rgba(20,184,166,0.05)' : 'var(--color-surface)',
             }}
@@ -232,7 +281,7 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
               className="hidden"
               onChange={handleFileInput}
             />
-            <Upload className="mx-auto mb-4" size={36} style={{ color: isDragging ? 'var(--color-accent)' : 'var(--color-text-muted)' }} />
+            <Upload className="mx-auto mb-4" size={36} style={{ color: isDragging ? '#14b8a6' : 'var(--color-text-muted)' }} />
             <p className="text-lg font-medium" style={{ color: 'var(--color-text)' }}>
               Drag & drop PDF statements here
             </p>
@@ -275,6 +324,11 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
         </motion.div>
       </div>
 
+      {/* Footer */}
+      <div className="relative z-10 py-4 text-center text-xs" style={{ color: 'var(--color-text-muted)' }}>
+        Made with ❤️ by Avi
+      </div>
+
       {/* Bottom action bar */}
       <AnimatePresence>
         {readyFiles.length > 0 && (
@@ -282,7 +336,7 @@ export default function UploadZone({ theme, onThemeToggle }: UploadZoneProps) {
             initial={{ opacity: 0, y: 40 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
-            className="fixed bottom-0 left-0 right-0 flex items-center justify-center gap-4 p-5 border-t"
+            className="fixed bottom-0 left-0 right-0 flex items-center justify-center gap-4 p-5 border-t z-20"
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <button
