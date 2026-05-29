@@ -3,6 +3,23 @@
 import type { ParsedStatement, AIInsight, CCSummary, SavingsSummary } from '@/types'
 import { formatINR, formatDate } from './utils'
 
+// jsPDF uses Helvetica which covers only ISO-8859-1 — sanitize before rendering
+function pdfText(text: string): string {
+  return (text ?? '')
+    .replace(/₹/g, 'Rs.')
+    .replace(/—|–/g, '-')        // em/en dash
+    .replace(/[‘’]/g, "'")       // smart single quotes
+    .replace(/[“”]/g, '"')       // smart double quotes
+    .replace(/•/g, '*')               // bullet
+    .replace(/[^\x20-\x7E]/g, ' ')        // replace any remaining non-ASCII
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+function pdfAmt(amount: number, compact = false): string {
+  return pdfText(pdfAmt(amount, compact))
+}
+
 // Colour palette for white-background PDF (prints cleanly, easy to read on screen)
 const C = {
   white:   [255, 255, 255] as [number, number, number],
@@ -144,9 +161,9 @@ export async function exportPDF(
   const boxX = [margin, margin + boxW + boxGap, margin + (boxW + boxGap) * 2]
 
   const boxes = [
-    { label: 'Total Credits', value: formatINR(totalCredits), color: C.green },
-    { label: 'Total Debits',  value: formatINR(totalDebits),  color: C.red   },
-    { label: 'Net Flow',      value: formatINR(Math.abs(net)), color: net >= 0 ? C.accent : C.red },
+    { label: 'Total Credits', value: pdfAmt(totalCredits), color: C.green },
+    { label: 'Total Debits',  value: pdfAmt(totalDebits),  color: C.red   },
+    { label: 'Net Flow',      value: pdfAmt(Math.abs(net)), color: net >= 0 ? C.accent : C.red },
   ]
 
   for (let i = 0; i < 3; i++) {
@@ -178,26 +195,26 @@ export async function exportPDF(
     doc.setFontSize(10)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...C.text)
-    doc.text(stmt.account_label, margin + 3, y + 5.5)
+    doc.text(pdfText(stmt.account_label), margin + 3, y + 5.5)
     const typeLabel = stmt.account_type === 'credit_card' ? 'Credit Card' : 'Savings'
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(8)
     doc.setTextColor(...C.muted)
-    doc.text(`${stmt.bank}  ·  ${typeLabel}  ·  ${formatDate(stmt.period_start)} – ${formatDate(stmt.period_end)}`, margin + contentW - 3, y + 5.5, { align: 'right' })
+    doc.text(`${pdfText(stmt.bank)}  .  ${typeLabel}  .  ${formatDate(stmt.period_start)} - ${formatDate(stmt.period_end)}`, margin + contentW - 3, y + 5.5, { align: 'right' })
     y += 12
 
     if (stmt.account_type === 'savings') {
       const s = stmt.summary as SavingsSummary
-      kv('Opening Balance', formatINR(s.opening_balance ?? 0))
-      kv('Closing Balance', formatINR(s.closing_balance ?? 0))
-      kv('Credits', formatINR(s.total_credits ?? 0), C.green)
-      kv('Debits',  formatINR(s.total_debits ?? 0),  C.red)
+      kv('Opening Balance', pdfAmt(s.opening_balance ?? 0))
+      kv('Closing Balance', pdfAmt(s.closing_balance ?? 0))
+      kv('Credits', pdfAmt(s.total_credits ?? 0), C.green)
+      kv('Debits',  pdfAmt(s.total_debits ?? 0),  C.red)
     } else {
       const s = stmt.summary as CCSummary
-      kv('Credit Limit',    formatINR(s.credit_limit ?? 0))
-      kv('Outstanding',     formatINR(s.total_outstanding ?? 0), C.red)
-      kv('Minimum Due',     `${formatINR(s.minimum_due ?? 0)} by ${formatDate(s.due_date ?? '')}`, C.amber)
-      kv('Cashback Earned', formatINR(s.cashback_earned ?? 0), C.green)
+      kv('Credit Limit',    pdfAmt(s.credit_limit ?? 0))
+      kv('Outstanding',     pdfAmt(s.total_outstanding ?? 0), C.red)
+      kv('Minimum Due',     `${pdfAmt(s.minimum_due ?? 0)} by ${formatDate(s.due_date ?? '')}`, C.amber)
+      kv('Cashback Earned', pdfAmt(s.cashback_earned ?? 0), C.green)
       if (s.rewards_points) kv('Rewards Points', `${s.rewards_points}`)
     }
     y += 4
@@ -242,7 +259,7 @@ export async function exportPDF(
     doc.setTextColor(...C.text)
     doc.text(cat, margin + 3, y + 4)
     doc.setFont('helvetica', 'bold')
-    doc.text(formatINR(amt), margin + 110, y + 4)
+    doc.text(pdfAmt(amt), margin + 110, y + 4)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.muted)
     doc.text(`${pct}%`, margin + 145, y + 4)
@@ -286,7 +303,7 @@ export async function exportPDF(
 
     // Insight card background
     doc.setFillColor(...C.bg)
-    const bodyLines = doc.splitTextToSize(insight.body, contentW - 6)
+    const bodyLines = doc.splitTextToSize(pdfText(insight.body), contentW - 6)
     const cardH = 12 + bodyLines.length * 4.5
     doc.roundedRect(margin, y, contentW, cardH, 2, 2, 'F')
     doc.setFillColor(...sColor)
@@ -295,7 +312,7 @@ export async function exportPDF(
     doc.setFontSize(9.5)
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...sColor)
-    doc.text(insight.title, margin + 6, y + 6)
+    doc.text(pdfText(insight.title), margin + 6, y + 6)
 
     doc.setFontSize(8.5)
     doc.setFont('helvetica', 'normal')
@@ -339,15 +356,15 @@ export async function exportPDF(
     doc.text((txn.txn_date ?? '').slice(5), margin + 2, y + 4)
 
     doc.setTextColor(...C.text)
-    doc.text((txn.merchant_name || txn.description).slice(0, 36), margin + 22, y + 4)
+    doc.text(pdfText(txn.merchant_name || txn.description).slice(0, 36), margin + 22, y + 4)
 
     doc.setTextColor(...C.muted)
-    doc.text(txn.category.slice(0, 18), margin + 95, y + 4)
+    doc.text(pdfText(txn.category).slice(0, 18), margin + 95, y + 4)
 
     const amtColor = txn.txn_type === 'credit' ? C.green : C.red
     doc.setTextColor(...amtColor)
     doc.setFont('helvetica', 'bold')
-    doc.text(formatINR(txn.amount), margin + 133, y + 4)
+    doc.text(pdfAmt(txn.amount), margin + 133, y + 4)
 
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.muted)

@@ -17,7 +17,7 @@ For credit card statements return:
 {"account_type":"credit_card","bank":"HDFC Bank","account_label":"HDFC Credit Card","period_start":"YYYY-MM-DD","period_end":"YYYY-MM-DD","statement_month":0,"statement_year":0,"summary":{"credit_limit":0.0,"total_outstanding":0.0,"minimum_due":0.0,"due_date":"YYYY-MM-DD","cashback_earned":0.0,"rewards_points":0,"total_credits":0.0,"total_debits":0.0},"transactions":[{"txn_date":"YYYY-MM-DD","description":"","merchant_name":"","amount":0.0,"txn_type":"credit|debit","is_cc_bill_payment":false,"category":"Others"}]}
 
 Rules:
-- bank: Find the issuing bank name from the statement header, logo text, or footer. Common Indian banks: "HDFC Bank", "SBI", "ICICI Bank", "Axis Bank", "Kotak Mahindra Bank", "Yes Bank", "IndusInd Bank", "RBL Bank", "AU Small Finance Bank", "Federal Bank". For SBI Card statements use "SBI". Never leave bank as empty string — infer from context.
+- bank: Find the issuing bank from header/footer text. If a "Bank hint from filename" is provided at the top, use it — many Indian banks (ICICI, HDFC, SBI) use image-only headers that PDF text extraction cannot read. Common banks: "HDFC Bank", "SBI", "ICICI Bank", "Axis Bank", "Kotak Mahindra Bank", "Yes Bank", "IndusInd Bank", "RBL Bank", "AU Small Finance Bank". Never output "Unknown Bank".
 - account_label: Descriptive label — savings: "HDFC Bank Savings", "ICICI Bank Current"; credit cards: "HDFC Credit Card", "SBI SimplyCLICK Card", "Axis Bank Flipkart Card". Use the card product name if visible.
 - merchant_name: Normalised clean name (e.g. "SWIGGY*12345MUMBAI" → "Swiggy", "AMZN Mktp IN" → "Amazon", "POS ZOMATO" → "Zomato", "UPI-PHONEPE" → "PhonePe", "IRCTC RAIL" → "IRCTC")
 - category: Use your knowledge to categorise each transaction. Choose ONE from: "Food & Dining", "Transport", "Shopping", "Entertainment", "Subscriptions", "Utilities", "Travel", "Investments", "Health", "Others". Use "Others" only when the merchant is truly unidentifiable.
@@ -41,6 +41,22 @@ Flag is_discretionary=true for entertainment OTT, gaming, lifestyle SaaS. Severi
 
 Spend data:`
 
+function extractBankFromFilename(filename: string): string | null {
+  const f = filename.toLowerCase().replace(/[_\-\s.]/g, ' ')
+  if (f.includes('icici'))    return 'ICICI Bank'
+  if (f.includes('hdfc'))     return 'HDFC Bank'
+  if (/\bsbi\b/.test(f))      return 'SBI'
+  if (f.includes('axis'))     return 'Axis Bank'
+  if (f.includes('kotak'))    return 'Kotak Mahindra Bank'
+  if (f.includes('indusind')) return 'IndusInd Bank'
+  if (f.includes('rbl'))      return 'RBL Bank'
+  if (f.includes('federal'))  return 'Federal Bank'
+  if (f.includes('yesbank') || (f.includes('yes') && f.includes('bank'))) return 'Yes Bank'
+  if (f.includes('amex') || f.includes('american express'))               return 'Amex'
+  if (f.includes('citibank') || f.includes('citi'))                       return 'Citibank'
+  return null
+}
+
 function repairTruncatedJSON(str: string): Record<string, unknown> | null {
   // Walk backwards from truncation point, try to close the JSON at each '}'
   const searchStart = Math.max(0, str.length - 1000)
@@ -60,6 +76,11 @@ function repairTruncatedJSON(str: string): Record<string, unknown> | null {
 }
 
 async function parseStatement(statement: RawStatement): Promise<ParsedStatement> {
+  const bankHint = extractBankFromFilename(statement.file_name)
+  const contextPrefix = bankHint
+    ? `Filename: ${statement.file_name}\nBank hint from filename: "${bankHint}" — use this as the bank field if the statement header is an image.\n\n`
+    : `Filename: ${statement.file_name}\n\n`
+
   const response = await client.messages.create({
     model: 'claude-haiku-4-5-20251001',
     max_tokens: 10000,
@@ -68,7 +89,7 @@ async function parseStatement(statement: RawStatement): Promise<ParsedStatement>
         role: 'user',
         content: [
           { type: 'text', text: PARSE_PROMPT, cache_control: { type: 'ephemeral' } },
-          { type: 'text', text: `Statement text:\n${statement.extracted_text.slice(0, 40000)}` },
+          { type: 'text', text: `${contextPrefix}Statement text:\n${statement.extracted_text.slice(0, 40000)}` },
         ],
       },
     ],
@@ -139,7 +160,9 @@ async function parseStatement(statement: RawStatement): Promise<ParsedStatement>
     id,
     file_name: statement.file_name,
     account_type: parsed.account_type ?? 'savings',
-    bank: parsed.bank ?? 'Unknown Bank',
+    bank: (parsed.bank && parsed.bank !== 'Unknown Bank' && parsed.bank.trim() !== '')
+      ? parsed.bank
+      : bankHint ?? 'Unknown Bank',
     account_label: parsed.account_label ?? statement.file_name,
     period_start: parsed.period_start ?? '',
     period_end: parsed.period_end ?? '',

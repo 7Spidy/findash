@@ -116,9 +116,12 @@ export default function MonthlyBarChart({ onMonthSelect }: MonthlyBarChartProps)
                 border: '1px solid rgba(255,255,255,0.08)',
                 borderRadius: 10,
                 fontSize: 12,
+                color: '#f5f5f5',
               }}
+              labelStyle={{ color: '#888', fontSize: 11 }}
+              itemStyle={{ color: '#f5f5f5' }}
               formatter={(v: number) => formatINR(v)}
-              cursor={{ fill: 'rgba(255,255,255,0.03)' }}
+              cursor={{ fill: 'rgba(255,255,255,0.07)' }}
             />
             <Legend
               formatter={(v) => <span style={{ color: 'var(--color-text-muted)', fontSize: 11 }}>{v}</span>}
