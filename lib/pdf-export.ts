@@ -115,7 +115,7 @@ export async function exportPDF(
     doc.setFont('helvetica', 'normal')
     doc.text(k, mg, y)
     doc.setTextColor(...vColor)
-    doc.setFont('times', 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.text(v, mg + xOffset, y)
     doc.setFont('helvetica', 'normal')
     y += 5.5
@@ -137,7 +137,7 @@ export async function exportPDF(
     doc.text(label, x + bW / 2, bY + 7, { align: 'center' })
 
     doc.setFontSize(14)
-    doc.setFont('times', 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.setTextColor(...vColor)
     doc.text(value, x + bW / 2, bY + 16, { align: 'center' })
     doc.setFont('helvetica', 'normal')
@@ -350,7 +350,7 @@ export async function exportPDF(
     doc.setFillColor(...cc)
     doc.rect(barX, y + 2.5, barW * (pct / 100), 2.5, 'F')
 
-    doc.setFont('times', 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.text(amt(catAmt), mg + 105, y + 5)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.muted)
@@ -365,7 +365,7 @@ export async function exportPDF(
   doc.setFillColor(...C.light)
   doc.rect(mg, y, cW, 7.5, 'F')
   doc.setFontSize(9)
-  doc.setFont('times', 'bold')
+  doc.setFont('helvetica', 'bold')
   doc.setTextColor(...C.text)
   doc.text('TOTAL', mg + 9, y + 5)
   doc.text(amt(catTotal), mg + 105, y + 5)
@@ -421,7 +421,7 @@ export async function exportPDF(
       // Related amount / merchant
       if (ins.related_amount > 0 || ins.related_merchant) {
         doc.setFontSize(7.5)
-        doc.setFont('times', 'bold')
+        doc.setFont('helvetica', 'bold')
         doc.setTextColor(...C.muted)
         const meta = [
           ins.related_amount > 0 ? amt(ins.related_amount) : '',
@@ -486,7 +486,7 @@ export async function exportPDF(
     } else {
       doc.setTextColor(...C.text)
     }
-    doc.setFont('times', 'bold')
+    doc.setFont('helvetica', 'bold')
     doc.text(amtTxt, mg + 138, y + 4.5)
 
     doc.setFont('helvetica', 'normal')
