@@ -336,8 +336,7 @@ export default function OverviewTab() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1
-            className="text-2xl font-extrabold"
-            style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
+            style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--color-text)', margin: 0 }}
           >
             {periodLabel}
           </h1>
@@ -395,14 +394,14 @@ export default function OverviewTab() {
             style={{ background: 'var(--color-surface)', borderColor: 'var(--color-border)' }}
           >
             <p
-              className="text-xs font-semibold tracking-wider mb-2"
-              style={{ color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}
+              className="mb-2 uppercase"
+              style={{ fontSize: 10, fontWeight: 600, color: 'var(--color-text-muted)', letterSpacing: '0.05em' }}
             >
               {stat.label}
             </p>
             <p
-              className="text-[30px] font-extrabold leading-none mb-1.5"
-              style={{ fontFamily: 'var(--font-serif)', color: stat.color, fontWeight: 800 }}
+              className="leading-none mb-1.5"
+              style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: stat.color }}
             >
               {stat.value}
             </p>
@@ -453,8 +452,7 @@ export default function OverviewTab() {
                       {c.pct}%
                     </span>
                     <span
-                      className="text-xs font-semibold tabular-nums"
-                      style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
+                      style={{ fontSize: 12.5, fontWeight: 600, color: 'var(--color-text)', fontVariantNumeric: 'tabular-nums' }}
                     >
                       {formatINR(c.value, true)}
                     </span>
@@ -585,8 +583,7 @@ export default function OverviewTab() {
                     </div>
                   </div>
                   <span
-                    className="text-xs font-semibold tabular-nums flex-shrink-0"
-                    style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
+                    style={{ fontSize: 13.5, fontWeight: 600, color: 'var(--color-text)', fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}
                   >
                     {formatINR(data.amount, true)}
                   </span>

@@ -142,22 +142,24 @@ export default function Home() {
             style={{ background: 'var(--color-bg)', borderColor: 'var(--color-border)' }}
           >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center gap-4 h-14">
-              {/* Logo */}
+              {/* Logo — "Spend" normal, "Dash" italic per spec */}
               <span
-                className="text-xl font-bold italic flex-shrink-0"
-                style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-accent)' }}
+                className="flex-shrink-0 select-none"
+                style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--color-accent)' }}
               >
-                SpendDash
+                Spend<em style={{ fontStyle: 'italic' }}>Dash</em>
               </span>
 
-              {/* Tabs — inline, desktop */}
+              {/* Tabs — inline, desktop. 400 inactive, 600 active per spec */}
               <nav className="hidden sm:flex items-end self-stretch gap-0 flex-1">
                 {TABS.map((tab) => (
                   <button
                     key={tab.id}
                     onClick={() => setActiveTab(tab.id)}
-                    className="relative px-4 h-full text-sm font-medium transition-colors"
+                    className="relative px-4 h-full transition-colors"
                     style={{
+                      fontSize: 13.5,
+                      fontWeight: activeTab === tab.id ? 600 : 400,
                       color:
                         activeTab === tab.id
                           ? 'var(--color-accent)'
@@ -213,8 +215,10 @@ export default function Home() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative flex-shrink-0 px-4 py-2.5 text-sm font-medium transition-colors"
+                  className="relative flex-shrink-0 px-4 py-2.5 transition-colors"
                   style={{
+                    fontSize: 10,
+                    fontWeight: activeTab === tab.id ? 600 : 400,
                     color:
                       activeTab === tab.id
                         ? 'var(--color-accent)'
@@ -239,15 +243,35 @@ export default function Home() {
               {activeTab === 'overview' && <OverviewTab key="overview" />}
 
               {activeTab === 'transactions' && (
-                <TransactionView
+                <motion.div
                   key="transactions"
-                  filterCategory={filterCategory}
-                  filterMonth={filterMonth}
-                  onFilterClear={() => {
-                    setFilterCategory(null)
-                    setFilterMonth(null)
-                  }}
-                />
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.25 }}
+                  className="space-y-6"
+                >
+                  <h1
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'clamp(20px, 4vw, 26px)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.02em',
+                      color: 'var(--color-text)',
+                      margin: 0,
+                    }}
+                  >
+                    Transactions
+                  </h1>
+                  <TransactionView
+                    filterCategory={filterCategory}
+                    filterMonth={filterMonth}
+                    onFilterClear={() => {
+                      setFilterCategory(null)
+                      setFilterMonth(null)
+                    }}
+                  />
+                </motion.div>
               )}
 
               {activeTab === 'cards' && (
@@ -259,6 +283,18 @@ export default function Home() {
                   transition={{ duration: 0.25 }}
                   className="space-y-6"
                 >
+                  <h1
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'clamp(20px, 4vw, 26px)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.02em',
+                      color: 'var(--color-text)',
+                      margin: 0,
+                    }}
+                  >
+                    Cards &amp; Accounts
+                  </h1>
                   <CCHealthCard />
                   <AccountBalanceCard />
                 </motion.div>
@@ -271,7 +307,20 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.25 }}
+                  className="space-y-6"
                 >
+                  <h1
+                    style={{
+                      fontFamily: 'var(--font-display)',
+                      fontSize: 'clamp(20px, 4vw, 26px)',
+                      fontWeight: 700,
+                      letterSpacing: '-0.02em',
+                      color: 'var(--color-text)',
+                      margin: 0,
+                    }}
+                  >
+                    AI Insights
+                  </h1>
                   <InsightCard />
                 </motion.div>
               )}

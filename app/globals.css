@@ -16,7 +16,9 @@
   --color-amber:        #D97706;
   --color-orange:       #EA580C;
   --color-blue:         #2563EB;
-  --font-serif:         'Playfair Display', Georgia, serif;
+  --font-body:          'DM Sans', sans-serif;
+  --font-display:       'Playfair Display', serif;
+  --font-serif:         'Playfair Display', serif; /* alias kept for compatibility */
   --radius-xl:          16px;
   --radius-md:          8px;
   --radius-full:        9999px;

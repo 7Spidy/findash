@@ -17,10 +17,9 @@ export default function Header() {
       style={{ background: 'var(--color-bg)', borderColor: 'var(--color-border)' }}
     >
       <span
-        className="text-2xl font-bold italic"
-        style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-accent)' }}
+        style={{ fontFamily: 'var(--font-display)', fontSize: 20, fontWeight: 700, color: 'var(--color-accent)' }}
       >
-        SpendDash
+        Spend<em style={{ fontStyle: 'italic' }}>Dash</em>
       </span>
 
       <div className="flex items-center gap-2">

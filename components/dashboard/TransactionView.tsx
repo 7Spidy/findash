@@ -263,7 +263,7 @@ export default function TransactionView({ filterCategory: externalCat, filterMon
                     <td
                       className="py-3 px-5 text-right text-sm font-semibold tabular-nums whitespace-nowrap"
                       style={{
-                        fontFamily: 'var(--font-serif)',
+                        fontVariantNumeric: 'tabular-nums',
                         color:
                           txn.txn_type === 'credit' ? 'var(--color-green)' : 'var(--color-text)',
                       }}
@@ -324,7 +324,7 @@ export default function TransactionView({ filterCategory: externalCat, filterMon
                   <span
                     className="text-sm font-semibold tabular-nums flex-shrink-0"
                     style={{
-                      fontFamily: 'var(--font-serif)',
+                      fontVariantNumeric: 'tabular-nums',
                       color: txn.txn_type === 'credit' ? 'var(--color-green)' : 'var(--color-text)',
                     }}
                   >
