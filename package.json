@@ -1,5 +1,5 @@
 {
-  "name": "findash",
+  "name": "spend-dash",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,11 +10,16 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.99.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
     "framer-motion": "^12.10.0",
     "js-cookie": "^3.0.5",
+    "jspdf": "^4.2.1",
+    "lucide-react": "^1.16.0",
+    "nanoid": "^5.1.11",
     "next": "^16.2.6",
+    "pdfjs-dist": "^5.7.284",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "recharts": "^2.14.1"
