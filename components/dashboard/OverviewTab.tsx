@@ -336,7 +336,7 @@ export default function OverviewTab() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <h1
-            className="text-xl font-bold"
+            className="text-2xl font-extrabold"
             style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
           >
             {periodLabel}
@@ -401,8 +401,8 @@ export default function OverviewTab() {
               {stat.label}
             </p>
             <p
-              className="text-2xl font-bold leading-none mb-1.5"
-              style={{ fontFamily: 'var(--font-serif)', color: stat.color }}
+              className="text-[30px] font-extrabold leading-none mb-1.5"
+              style={{ fontFamily: 'var(--font-serif)', color: stat.color, fontWeight: 800 }}
             >
               {stat.value}
             </p>

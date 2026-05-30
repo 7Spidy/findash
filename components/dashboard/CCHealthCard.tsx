@@ -94,7 +94,7 @@ export default function CCHealthCard() {
               <ArcGauge pct={utilPct} />
             </div>
 
-            <p className="text-2xl font-bold mb-1" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>
+            <p className="text-[28px] leading-none mb-1" style={{ fontFamily: 'var(--font-serif)', fontWeight: 800, color: 'var(--color-text)' }}>
               {formatINR(s.total_outstanding ?? 0)}
             </p>
             <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>

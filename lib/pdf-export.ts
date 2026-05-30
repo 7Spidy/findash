@@ -3,7 +3,6 @@
 import type { ParsedStatement, AIInsight, CCSummary, SavingsSummary } from '@/types'
 import { formatINR, formatDate } from './utils'
 
-// jsPDF uses Helvetica (ISO-8859-1) — strip non-ASCII before rendering
 function safe(text: string): string {
   return (text ?? '')
     .replace(/₹/g, 'Rs.')
@@ -20,18 +19,43 @@ function amt(n: number): string {
   return safe(formatINR(n))
 }
 
+// Palette
 const C = {
-  white:  [255, 255, 255] as [number, number, number],
-  bg:     [250, 248, 243] as [number, number, number],  // warm parchment
-  bg2:    [243, 240, 233] as [number, number, number],  // slightly darker row bg
-  border: [230, 224, 212] as [number, number, number],
-  text:   [15,  23,  42]  as [number, number, number],
-  muted:  [107, 114, 128] as [number, number, number],
-  accent: [123, 63,  0]   as [number, number, number],  // warm brown
-  green:  [5,   150, 105] as [number, number, number],
-  red:    [220, 38,  38]  as [number, number, number],
-  amber:  [217, 119, 6]   as [number, number, number],
-  blue:   [37,  99,  235] as [number, number, number],
+  white:   [255, 255, 255] as [number, number, number],
+  offwhite:[250, 248, 243] as [number, number, number],
+  light:   [243, 240, 233] as [number, number, number],
+  border:  [230, 224, 212] as [number, number, number],
+  text:    [15,  23,  42]  as [number, number, number],
+  muted:   [107, 114, 128] as [number, number, number],
+  subtle:  [156, 163, 175] as [number, number, number],
+  accent:  [123, 63,  0]   as [number, number, number],
+  green:   [5,   150, 105] as [number, number, number],
+  red:     [220, 38,  38]  as [number, number, number],
+  amber:   [217, 119, 6]   as [number, number, number],
+  blue:    [37,  99,  235] as [number, number, number],
+  orange:  [234, 88,  12]  as [number, number, number],
+}
+
+// Category accent colors for visual indicators
+const CAT_COLORS: Record<string, [number, number, number]> = {
+  'Food & Dining': [249, 115, 22],
+  'Transport':     [59,  130, 246],
+  'Shopping':      [168, 85,  247],
+  'Entertainment': [236, 72,  153],
+  'Subscriptions': [99,  102, 241],
+  'Utilities':     [234, 179, 8],
+  'Travel':        [14,  165, 233],
+  'Investments':   [34,  197, 94],
+  'Health':        [239, 68,  68],
+  'Others':        [107, 114, 128],
+}
+
+const INSIGHT_COLORS: Record<string, [number, number, number]> = {
+  subscription: [217, 119, 6],
+  anomaly:      [220, 38,  38],
+  trend:        [59,  130, 246],
+  savings_tip:  [37,  99,  235],
+  cc_health:    [5,   150, 105],
 }
 
 export async function exportPDF(
@@ -41,10 +65,10 @@ export async function exportPDF(
   const { default: jsPDF } = await import('jspdf')
 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-  const pageW = 210
-  const pageH = 297
-  const mg = 16
-  const cW = pageW - mg * 2
+  const W = 210
+  const H = 297
+  const mg = 18          // page margin
+  const cW = W - mg * 2  // content width
   let y = mg
 
   // ── helpers ──────────────────────────────────────────────────────────────────
@@ -52,79 +76,109 @@ export async function exportPDF(
   function newPage() {
     doc.addPage()
     doc.setFillColor(...C.white)
-    doc.rect(0, 0, pageW, pageH, 'F')
+    doc.rect(0, 0, W, H, 'F')
     y = mg
+    // Subtle top accent stripe
+    doc.setFillColor(...C.accent)
+    doc.rect(0, 0, W, 1.5, 'F')
   }
 
-  function guard(need = 18) {
-    if (y + need > pageH - mg) newPage()
+  function guard(need = 20) {
+    if (y + need > H - mg) newPage()
   }
 
-  function heading(text: string) {
-    guard(16)
-    doc.setFontSize(14)
-    doc.setFont('helvetica', 'bold')
+  // Page number footer helper (called at end)
+  const pages: number[] = []
+
+  function sectionHeading(title: string) {
+    guard(18)
+    // Accent left bar + heading text in Times Bold
+    doc.setFillColor(...C.accent)
+    doc.rect(mg, y, 3, 9, 'F')
+    doc.setFontSize(13)
+    doc.setFont('times', 'bold')
     doc.setTextColor(...C.accent)
-    doc.text(text, mg, y)
-    y += 4
-    doc.setDrawColor(...C.accent)
-    doc.setLineWidth(0.35)
-    doc.line(mg, y, mg + cW, y)
+    doc.text(title.toUpperCase(), mg + 6, y + 6.5)
+    y += 9
+    // Thin divider line
+    doc.setDrawColor(...C.border)
+    doc.setLineWidth(0.25)
+    doc.line(mg, y + 1, mg + cW, y + 1)
     y += 6
     doc.setFont('helvetica', 'normal')
   }
 
-  function kv(k: string, v: string, vColor: [number, number, number] = C.text, xOffset = 55) {
+  function kv(k: string, v: string, vColor: [number, number, number] = C.text, xOffset = 58) {
     guard(6)
     doc.setFontSize(8.5)
     doc.setTextColor(...C.muted)
     doc.setFont('helvetica', 'normal')
     doc.text(k, mg, y)
     doc.setTextColor(...vColor)
-    doc.setFont('helvetica', 'bold')
+    doc.setFont('times', 'bold')
     doc.text(v, mg + xOffset, y)
     doc.setFont('helvetica', 'normal')
     y += 5.5
   }
 
-  function bodyText(text: string, size = 9, color: [number, number, number] = C.text) {
-    guard(8)
-    doc.setFontSize(size)
-    doc.setTextColor(...color)
-    doc.setFont('helvetica', 'normal')
-    const lines = doc.splitTextToSize(text, cW)
-    doc.text(lines, mg, y)
-    y += lines.length * size * 0.42 + 2
-  }
+  function statBox(
+    x: number, bY: number, bW: number, bH: number,
+    label: string, value: string, vColor: [number, number, number]
+  ) {
+    doc.setFillColor(...C.offwhite)
+    doc.roundedRect(x, bY, bW, bH, 2.5, 2.5, 'F')
+    doc.setDrawColor(...C.border)
+    doc.setLineWidth(0.2)
+    doc.roundedRect(x, bY, bW, bH, 2.5, 2.5, 'S')
 
-  function tableHeader(cols: { label: string; x: number }[]) {
-    doc.setFillColor(...C.accent)
-    doc.rect(mg, y, cW, 7, 'F')
-    doc.setFontSize(8)
+    doc.setFontSize(7)
     doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...C.white)
-    cols.forEach(({ label, x }) => doc.text(label, mg + x, y + 4.8))
-    y += 7
+    doc.setTextColor(...C.muted)
+    doc.text(label, x + bW / 2, bY + 7, { align: 'center' })
+
+    doc.setFontSize(14)
+    doc.setFont('times', 'bold')
+    doc.setTextColor(...vColor)
+    doc.text(value, x + bW / 2, bY + 16, { align: 'center' })
     doc.setFont('helvetica', 'normal')
   }
 
   // ── COVER PAGE ────────────────────────────────────────────────────────────────
   doc.setFillColor(...C.white)
-  doc.rect(0, 0, pageW, pageH, 'F')
+  doc.rect(0, 0, W, H, 'F')
 
-  // Header bar
+  // Dark header band
   doc.setFillColor(...C.accent)
-  doc.rect(0, 0, pageW, 58, 'F')
+  doc.rect(0, 0, W, 70, 'F')
 
-  doc.setFontSize(32)
-  doc.setFont('helvetica', 'bold')
+  // Subtle texture lines
+  doc.setDrawColor(255, 255, 255)
+  doc.setLineWidth(0.08)
+  for (let i = 0; i < 12; i++) {
+    doc.line(0, i * 7, W, i * 7 - 14)
+  }
+
+  // Logo / title
+  doc.setFontSize(38)
+  doc.setFont('times', 'bold')
   doc.setTextColor(...C.white)
-  doc.text('SpendDash', pageW / 2, 28, { align: 'center' })
-  doc.setFontSize(12)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Personal Financial Report', pageW / 2, 43, { align: 'center' })
+  doc.text('SpendDash', W / 2, 32, { align: 'center' })
 
-  const allDates = statements.flatMap((s) => [s.period_start, s.period_end]).filter(Boolean).sort()
+  doc.setFontSize(11)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(255, 220, 180)
+  doc.text('Personal Financial Report', W / 2, 44, { align: 'center' })
+
+  // Horizontal rule under header
+  doc.setFillColor(...C.offwhite)
+  doc.rect(0, 70, W, 4, 'F')
+
+  // Period + statements
+  const allDates = statements
+    .flatMap((s) => [s.period_start, s.period_end])
+    .filter(Boolean)
+    .sort()
+
   const periodStr =
     allDates.length >= 2
       ? `${formatDate(allDates[0])} to ${formatDate(allDates[allDates.length - 1])}`
@@ -132,93 +186,93 @@ export async function exportPDF(
         ? formatDate(allDates[0])
         : 'Unknown Period'
 
-  doc.setFontSize(18)
-  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(20)
+  doc.setFont('times', 'bold')
   doc.setTextColor(...C.text)
-  doc.text(periodStr, pageW / 2, 88, { align: 'center' })
+  doc.text(periodStr, W / 2, 92, { align: 'center' })
 
-  doc.setFontSize(10)
+  doc.setFontSize(9)
   doc.setFont('helvetica', 'normal')
   doc.setTextColor(...C.muted)
   doc.text(
-    `${statements.length} statement${statements.length !== 1 ? 's' : ''}`,
-    pageW / 2,
-    98,
+    `${statements.length} statement${statements.length !== 1 ? 's' : ''}  ·  Generated on ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+    W / 2,
+    101,
     { align: 'center' }
   )
 
-  // Summary boxes
-  let totalCredits = 0
-  let totalDebits = 0
+  // Stat boxes (3 side by side)
   let totalSpend = 0
-  for (const stmt of statements) {
-    const s = stmt.summary as SavingsSummary & CCSummary
-    totalCredits += s.total_credits ?? 0
-    totalDebits += s.total_debits ?? 0
-  }
+  let totalIncome = 0
   for (const stmt of statements) {
     for (const t of stmt.transactions) {
       if (!t.is_cc_bill_payment && t.txn_type === 'debit') totalSpend += t.amount
+      if (stmt.account_type === 'savings' && t.txn_type === 'credit') totalIncome += t.amount
     }
   }
-  const net = totalCredits - totalDebits
+  const netFlow = totalIncome - totalSpend
 
-  const boxW = 54
-  const boxGap = 6
-  const boxY = 118
-  const boxXs = [mg, mg + boxW + boxGap, mg + (boxW + boxGap) * 2]
-  const boxes = [
-    { label: 'Total Spend',  val: amt(totalSpend),       color: C.red    },
-    { label: 'Total Income', val: amt(totalCredits),     color: C.green  },
-    { label: 'Net Flow',     val: (net >= 0 ? '+' : '-') + amt(Math.abs(net)), color: net >= 0 ? C.green : C.red },
-  ]
-  boxes.forEach((b, i) => {
-    doc.setFillColor(...C.bg2)
-    doc.roundedRect(boxXs[i], boxY, boxW, 30, 3, 3, 'F')
-    doc.setDrawColor(...C.border)
-    doc.setLineWidth(0.3)
-    doc.roundedRect(boxXs[i], boxY, boxW, 30, 3, 3, 'S')
-    doc.setFontSize(8)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...C.muted)
-    doc.text(b.label, boxXs[i] + boxW / 2, boxY + 9, { align: 'center' })
-    doc.setFontSize(12)
-    doc.setFont('helvetica', 'bold')
-    doc.setTextColor(...b.color)
-    doc.text(b.val, boxXs[i] + boxW / 2, boxY + 22, { align: 'center' })
-    doc.setFont('helvetica', 'normal')
-  })
-
-  doc.setFontSize(7.5)
-  doc.setTextColor(...C.muted)
-  doc.text(
-    `Generated on ${new Date().toLocaleString('en-IN')}  •  Data stays in your browser — never uploaded`,
-    pageW / 2,
-    pageH - 12,
-    { align: 'center' }
+  const bW = 52, bH = 24, bGap = 6
+  const bX0 = mg
+  const bY0 = 114
+  statBox(bX0,             bY0, bW, bH, 'TOTAL SPEND',  amt(totalSpend), C.red)
+  statBox(bX0 + bW + bGap, bY0, bW, bH, 'TOTAL INCOME', amt(totalIncome), C.green)
+  statBox(bX0 + (bW + bGap) * 2, bY0, bW, bH, 'NET FLOW',
+    (netFlow >= 0 ? '+' : '') + amt(Math.abs(netFlow)),
+    netFlow >= 0 ? C.green : C.red
   )
+
+  // Account type pills
+  const acctTypes = [...new Set(statements.map((s) => s.account_type === 'credit_card' ? 'Credit Card' : 'Savings'))]
+  const banks = [...new Set(statements.map((s) => s.bank))].slice(0, 4)
+  doc.setFontSize(8)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(...C.muted)
+  doc.text(`Accounts: ${banks.join(', ')}  ·  Types: ${acctTypes.join(', ')}`, W / 2, 148, { align: 'center' })
+
+  // Decorative divider
+  doc.setDrawColor(...C.border)
+  doc.setLineWidth(0.4)
+  doc.line(mg + 20, 154, W - mg - 20, 154)
+
+  // Privacy note
+  doc.setFontSize(8)
+  doc.setTextColor(...C.subtle)
+  doc.text(
+    'All data was processed entirely in your browser. Nothing was uploaded to any server.',
+    W / 2, 162, { align: 'center' }
+  )
+
+  // Footer
+  doc.setFontSize(7.5)
+  doc.setTextColor(...C.subtle)
+  doc.text('SpendDash  ·  spend-dash.vercel.app', W / 2, H - 12, { align: 'center' })
 
   // ── PAGE 2: FINANCIAL SUMMARY ─────────────────────────────────────────────────
   newPage()
-  heading('Financial Summary')
+  sectionHeading('Financial Summary')
 
   for (const stmt of statements) {
-    guard(40)
+    guard(50)
     // Statement header band
-    doc.setFillColor(...C.bg2)
-    doc.roundedRect(mg, y, cW, 9, 2, 2, 'F')
+    doc.setFillColor(...C.light)
+    doc.roundedRect(mg, y, cW, 10, 2, 2, 'F')
+    doc.setFillColor(...C.accent)
+    doc.roundedRect(mg, y, 3, 10, 1, 1, 'F')
+
     doc.setFontSize(10)
-    doc.setFont('helvetica', 'bold')
+    doc.setFont('times', 'bold')
     doc.setTextColor(...C.text)
-    doc.text(safe(stmt.account_label), mg + 3, y + 6)
-    doc.setFontSize(8)
+    doc.text(safe(stmt.account_label), mg + 6, y + 6.5)
+
+    const typeLabel = stmt.account_type === 'credit_card' ? 'Credit Card' : 'Savings'
+    doc.setFontSize(7.5)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.muted)
-    const typeLabel = stmt.account_type === 'credit_card' ? 'Credit Card' : 'Savings'
     doc.text(
       `${safe(stmt.bank)}  ·  ${typeLabel}  ·  ${formatDate(stmt.period_start)} – ${formatDate(stmt.period_end)}`,
-      mg + cW - 3,
-      y + 6,
+      mg + cW,
+      y + 6.5,
       { align: 'right' }
     )
     y += 14
@@ -227,120 +281,162 @@ export async function exportPDF(
       const s = stmt.summary as SavingsSummary
       kv('Opening Balance', amt(s.opening_balance ?? 0))
       kv('Closing Balance', amt(s.closing_balance ?? 0))
-      kv('Total Credits',   amt(s.total_credits ?? 0), C.green)
-      kv('Total Debits',    amt(s.total_debits ?? 0),  C.red)
+      kv('Total Credits',   amt(s.total_credits ?? 0),   C.green)
+      kv('Total Debits',    amt(s.total_debits ?? 0),    C.red)
     } else {
       const s = stmt.summary as CCSummary
       kv('Credit Limit',    amt(s.credit_limit ?? 0))
-      kv('Outstanding',     amt(s.total_outstanding ?? 0), C.red)
+      kv('Outstanding',     amt(s.total_outstanding ?? 0),  C.red)
       kv('Minimum Due',     `${amt(s.minimum_due ?? 0)}  by  ${formatDate(s.due_date ?? '')}`, C.amber)
-      kv('Cashback Earned', amt(s.cashback_earned ?? 0), C.green)
-      if ((s.rewards_points ?? 0) > 0) kv('Reward Points', `${s.rewards_points}`)
+      kv('Cashback Earned', amt(s.cashback_earned ?? 0),    C.green)
+      if ((s.rewards_points ?? 0) > 0) kv('Reward Points', `${s.rewards_points} pts`)
     }
     y += 6
   }
 
   // ── SPEND BY CATEGORY ─────────────────────────────────────────────────────────
   newPage()
-  heading('Spend by Category')
+  sectionHeading('Spend by Category')
 
   const catMap: Record<string, number> = {}
-  for (const stmt of statements) {
-    for (const t of stmt.transactions) {
-      if (t.is_cc_bill_payment || t.txn_type === 'credit') continue
-      catMap[t.category] = (catMap[t.category] ?? 0) + t.amount
-    }
-  }
-  const sortedCats = Object.entries(catMap).sort(([, a], [, b]) => b - a)
-
-  tableHeader([
-    { label: 'Category',   x: 3   },
-    { label: 'Amount',     x: 110 },
-    { label: '% of Spend', x: 145 },
-    { label: 'Txns',       x: 168 },
-  ])
-
-  // Count transactions per category
+  let catTotal = 0
   const catTxnCount: Record<string, number> = {}
   for (const stmt of statements) {
     for (const t of stmt.transactions) {
       if (t.is_cc_bill_payment || t.txn_type === 'credit') continue
+      catMap[t.category] = (catMap[t.category] ?? 0) + t.amount
       catTxnCount[t.category] = (catTxnCount[t.category] ?? 0) + 1
+      catTotal += t.amount
     }
   }
+  const sortedCats = Object.entries(catMap).sort(([, a], [, b]) => b - a)
+
+  // Table header
+  doc.setFillColor(...C.text)
+  doc.rect(mg, y, cW, 8, 'F')
+  doc.setFontSize(7.5)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...C.white)
+  doc.text('CATEGORY',   mg + 10, y + 5.2)
+  doc.text('AMOUNT',     mg + 105, y + 5.2)
+  doc.text('SHARE',      mg + 140, y + 5.2)
+  doc.text('TXNS',       mg + 164, y + 5.2)
+  y += 8
 
   sortedCats.forEach(([cat, catAmt], idx) => {
-    guard(7)
-    if (idx % 2 === 1) {
-      doc.setFillColor(...C.bg)
-      doc.rect(mg, y - 0.5, cW, 7, 'F')
+    guard(8)
+    if (idx % 2 === 0) {
+      doc.setFillColor(...C.offwhite)
+      doc.rect(mg, y, cW, 7.5, 'F')
     }
-    const pct = totalSpend > 0 ? ((catAmt / totalSpend) * 100).toFixed(1) : '0.0'
+
+    // Category color dot
+    const cc = CAT_COLORS[cat] ?? C.muted
+    doc.setFillColor(...cc)
+    doc.circle(mg + 4, y + 3.8, 2, 'F')
+
     doc.setFontSize(9)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.text)
-    doc.text(cat, mg + 3, y + 4.5)
-    doc.setFont('helvetica', 'bold')
-    doc.text(amt(catAmt), mg + 110, y + 4.5)
+    doc.text(cat, mg + 9, y + 5)
+
+    const pct = catTotal > 0 ? ((catAmt / catTotal) * 100) : 0
+
+    // Mini bar
+    const barX = mg + 90
+    const barW = 12
+    doc.setFillColor(...C.border)
+    doc.rect(barX, y + 2.5, barW, 2.5, 'F')
+    doc.setFillColor(...cc)
+    doc.rect(barX, y + 2.5, barW * (pct / 100), 2.5, 'F')
+
+    doc.setFont('times', 'bold')
+    doc.text(amt(catAmt), mg + 105, y + 5)
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.muted)
-    doc.text(`${pct}%`, mg + 145, y + 4.5)
-    doc.text(String(catTxnCount[cat] ?? 0), mg + 168, y + 4.5)
-    y += 7
+    doc.text(`${pct.toFixed(1)}%`, mg + 140, y + 5)
+    doc.text(String(catTxnCount[cat] ?? 0), mg + 164, y + 5)
+
+    y += 7.5
   })
-  y += 6
+
+  // Summary row
+  guard(8)
+  doc.setFillColor(...C.light)
+  doc.rect(mg, y, cW, 7.5, 'F')
+  doc.setFontSize(9)
+  doc.setFont('times', 'bold')
+  doc.setTextColor(...C.text)
+  doc.text('TOTAL', mg + 9, y + 5)
+  doc.text(amt(catTotal), mg + 105, y + 5)
+  doc.setFont('helvetica', 'normal')
+  y += 10
 
   // ── AI INSIGHTS ────────────────────────────────────────────────────────────────
-  if (insights.length > 0) {
+  const active = insights.filter((i) => !i.dismissed)
+  if (active.length > 0) {
     newPage()
-    heading('AI Insights')
+    sectionHeading('AI Insights')
 
-    const insightColor = (type: string): [number, number, number] => {
-      if (type === 'anomaly') return C.red
-      if (type === 'subscription') return C.amber
-      if (type === 'cc_health') return C.green
-      if (type === 'savings_tip') return C.blue
-      return C.accent
+    const INSIGHT_ICON: Record<string, string> = {
+      subscription: '[SUB]',
+      anomaly:      '[!]',
+      trend:        '[~]',
+      savings_tip:  '[*]',
+      cc_health:    '[OK]',
     }
 
-    const active = insights.filter((i) => !i.dismissed)
     for (const ins of active) {
-      const iColor = insightColor(ins.insight_type)
-      const bodyLines = doc.splitTextToSize(safe(ins.body), cW - 8)
-      const cardH = 13 + bodyLines.length * 4.8
-      guard(cardH + 4)
+      const iColor = INSIGHT_COLORS[ins.insight_type] ?? C.accent
+      const bodyLines = doc.splitTextToSize(safe(ins.body), cW - 12)
+      const cardH = Math.max(16, 11 + bodyLines.length * 4.5)
+      guard(cardH + 5)
 
-      doc.setFillColor(...C.bg)
+      // Card background
+      doc.setFillColor(...C.offwhite)
       doc.roundedRect(mg, y, cW, cardH, 2, 2, 'F')
+
+      // Accent left stripe
       doc.setFillColor(...iColor)
-      doc.roundedRect(mg, y, 3.5, cardH, 1, 1, 'F')
+      doc.roundedRect(mg, y, 4, cardH, 1, 1, 'F')
 
+      // Title
       doc.setFontSize(9.5)
-      doc.setFont('helvetica', 'bold')
+      doc.setFont('times', 'bold')
       doc.setTextColor(...iColor)
-      doc.text(safe(ins.title), mg + 7, y + 7)
+      doc.text(safe(ins.title), mg + 8, y + 7)
 
-      doc.setFontSize(8.5)
+      // Severity badge
+      const sevColor = ins.severity === 'critical' ? C.red : ins.severity === 'warning' ? C.amber : C.muted
+      doc.setFontSize(7)
       doc.setFont('helvetica', 'normal')
-      doc.setTextColor(...C.text)
-      doc.text(bodyLines, mg + 7, y + 13)
+      doc.setTextColor(...sevColor)
+      doc.text(ins.severity.toUpperCase(), mg + cW - 4, y + 7, { align: 'right' })
 
-      if (ins.related_amount > 0) {
+      // Body
+      doc.setFontSize(8.5)
+      doc.setTextColor(...C.text)
+      doc.text(bodyLines, mg + 8, y + 13)
+
+      // Related amount / merchant
+      if (ins.related_amount > 0 || ins.related_merchant) {
         doc.setFontSize(7.5)
+        doc.setFont('times', 'bold')
         doc.setTextColor(...C.muted)
-        doc.text(
-          `${ins.insight_type === 'subscription' ? amt(ins.related_amount) + '/mo' : amt(ins.related_amount)}${ins.related_merchant ? '  ·  ' + safe(ins.related_merchant) : ''}`,
-          mg + 7,
-          y + cardH - 3.5
-        )
+        const meta = [
+          ins.related_amount > 0 ? amt(ins.related_amount) : '',
+          ins.related_merchant ? safe(ins.related_merchant) : '',
+        ].filter(Boolean).join('  ·  ')
+        if (meta) doc.text(meta, mg + 8, y + cardH - 3.5)
       }
+
       y += cardH + 4
     }
   }
 
   // ── ALL TRANSACTIONS ──────────────────────────────────────────────────────────
   newPage()
-  heading('All Transactions')
+  sectionHeading('All Transactions')
 
   const allTxns = statements
     .flatMap((s) =>
@@ -348,53 +444,69 @@ export async function exportPDF(
     )
     .sort((a, b) => (a.txn_date ?? '').localeCompare(b.txn_date ?? ''))
 
-  tableHeader([
-    { label: 'Date',     x: 2   },
-    { label: 'Merchant', x: 22  },
-    { label: 'Category', x: 98  },
-    { label: 'Amount',   x: 136 },
-    { label: 'Type',     x: 161 },
-  ])
+  // Table header
+  doc.setFillColor(...C.text)
+  doc.rect(mg, y, cW, 8, 'F')
+  doc.setFontSize(7.5)
+  doc.setFont('helvetica', 'bold')
+  doc.setTextColor(...C.white)
+  doc.text('DATE',      mg + 2,   y + 5.2)
+  doc.text('MERCHANT',  mg + 22,  y + 5.2)
+  doc.text('CATEGORY',  mg + 100, y + 5.2)
+  doc.text('AMOUNT',    mg + 138, y + 5.2)
+  doc.text('TYPE',      mg + 163, y + 5.2)
+  y += 8
 
   allTxns.forEach((txn, idx) => {
-    guard(6.5)
-    if (idx % 2 === 1) {
-      doc.setFillColor(...C.bg)
-      doc.rect(mg, y - 0.5, cW, 6.5, 'F')
+    guard(7)
+    if (idx % 2 === 0) {
+      doc.setFillColor(...C.offwhite)
+      doc.rect(mg, y, cW, 6.5, 'F')
     }
+
+    // Category color micro-dot
+    const tc = CAT_COLORS[txn.category] ?? C.muted
+    doc.setFillColor(...tc)
+    doc.circle(mg + 17.5, y + 3.3, 1.2, 'F')
+
     doc.setFontSize(7.5)
     doc.setFont('helvetica', 'normal')
-
     doc.setTextColor(...C.muted)
-    doc.text((txn.txn_date ?? '').slice(5), mg + 2, y + 4)
+    doc.text((txn.txn_date ?? '').slice(5), mg + 2, y + 4.5)
 
     doc.setTextColor(...C.text)
-    doc.text(safe(txn.merchant_name || txn.description).slice(0, 38), mg + 22, y + 4)
+    doc.text(safe(txn.merchant_name || txn.description).slice(0, 36), mg + 22, y + 4.5)
 
     doc.setTextColor(...C.muted)
-    doc.text(safe(txn.category).slice(0, 18), mg + 98, y + 4)
+    doc.text(safe(txn.category).slice(0, 16), mg + 100, y + 4.5)
 
-    doc.setTextColor(txn.txn_type === 'credit' ? C.green[0] : C.red[0], txn.txn_type === 'credit' ? C.green[1] : C.red[1], txn.txn_type === 'credit' ? C.green[2] : C.red[2])
-    doc.setFont('helvetica', 'bold')
-    doc.text(amt(txn.amount), mg + 136, y + 4)
+    const amtTxt = amt(txn.amount)
+    if (txn.txn_type === 'credit') {
+      doc.setTextColor(...C.green)
+    } else {
+      doc.setTextColor(...C.text)
+    }
+    doc.setFont('times', 'bold')
+    doc.text(amtTxt, mg + 138, y + 4.5)
 
     doc.setFont('helvetica', 'normal')
     doc.setTextColor(...C.muted)
-    doc.text(txn.txn_type, mg + 161, y + 4)
+    doc.text(txn.txn_type, mg + 163, y + 4.5)
 
     y += 6.5
   })
 
-  // ── FOOTER on last page ───────────────────────────────────────────────────────
-  const totalPages = (doc as unknown as { getNumberOfPages(): number }).getNumberOfPages?.() ?? 1
+  // ── FOOTER on every page ──────────────────────────────────────────────────────
+  const totalPages = doc.getNumberOfPages()
   for (let p = 1; p <= totalPages; p++) {
     doc.setPage(p)
     doc.setFontSize(7)
-    doc.setTextColor(...C.muted)
-    doc.text(`SpendDash Report  ·  ${periodStr}`, mg, pageH - 8)
-    doc.text(`Page ${p} of ${totalPages}`, pageW - mg, pageH - 8, { align: 'right' })
+    doc.setFont('helvetica', 'normal')
+    doc.setTextColor(...C.subtle)
+    doc.text(`SpendDash  ·  ${periodStr}`, mg, H - 7)
+    doc.text(`${p} / ${totalPages}`, W - mg, H - 7, { align: 'right' })
   }
 
-  const fileDate = allDates[0] ? allDates[0].slice(0, 7) : 'report'
+  const fileDate = allDates[0]?.slice(0, 7) ?? 'report'
   doc.save(`spenddash-${fileDate}.pdf`)
 }
