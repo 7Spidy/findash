@@ -93,7 +93,7 @@ function SvgDonut({
             fontSize="13"
             fontWeight="700"
             fill="#0F172A"
-            fontFamily="Playfair Display, serif"
+            fontFamily="'DM Sans', sans-serif"
           >
             {formatINR(hoveredSlice.value, true)}
           </text>
@@ -113,7 +113,7 @@ function SvgDonut({
             fontSize="14"
             fontWeight="700"
             fill="#0F172A"
-            fontFamily="Playfair Display, serif"
+            fontFamily="'DM Sans', sans-serif"
           >
             {formatINR(total, true)}
           </text>
@@ -402,7 +402,7 @@ export default function OverviewTab() {
             </p>
             <p
               className="text-[30px] font-extrabold leading-none mb-1.5"
-              style={{ fontFamily: 'var(--font-serif)', color: stat.color, fontWeight: 800 }}
+              style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.02em', color: stat.color, fontWeight: 800 }}
             >
               {stat.value}
             </p>
@@ -454,7 +454,7 @@ export default function OverviewTab() {
                     </span>
                     <span
                       className="text-xs font-semibold tabular-nums"
-                      style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
+                      style={{ fontFamily: "'DM Sans', sans-serif", color: 'var(--color-text)' }}
                     >
                       {formatINR(c.value, true)}
                     </span>
@@ -586,7 +586,7 @@ export default function OverviewTab() {
                   </div>
                   <span
                     className="text-xs font-semibold tabular-nums flex-shrink-0"
-                    style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}
+                    style={{ fontFamily: "'DM Sans', sans-serif", color: 'var(--color-text)' }}
                   >
                     {formatINR(data.amount, true)}
                   </span>

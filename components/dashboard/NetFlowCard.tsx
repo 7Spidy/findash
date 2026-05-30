@@ -121,7 +121,7 @@ export default function NetFlowCard() {
         {/* Column A */}
         <div>
           <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>{colA.label}</p>
-          <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: colA.color }}>
+          <p className="text-2xl font-bold" style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.02em', color: colA.color }}>
             {formatINR(animA)}
           </p>
         </div>
@@ -129,7 +129,7 @@ export default function NetFlowCard() {
         {/* Column B */}
         <div>
           <p className="text-xs mb-1" style={{ color: 'var(--color-text-muted)' }}>{colB.label}</p>
-          <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: colB.color }}>
+          <p className="text-2xl font-bold" style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.02em', color: colB.color }}>
             {formatINR(animB)}
           </p>
         </div>
@@ -143,7 +143,7 @@ export default function NetFlowCard() {
                 ? <TrendingUp  size={18} style={{ color: 'var(--color-accent)' }} />
                 : <TrendingDown size={18} style={{ color: 'var(--color-red)' }} />
             )}
-            <p className="text-2xl font-bold" style={{ fontFamily: 'var(--font-serif)', color: colC.color }}>
+            <p className="text-2xl font-bold" style={{ fontFamily: "'DM Sans', sans-serif", letterSpacing: '-0.02em', color: colC.color }}>
               {!ccOnly && netSaved < 0 ? '−' : ''}{formatINR(animC)}
             </p>
           </div>

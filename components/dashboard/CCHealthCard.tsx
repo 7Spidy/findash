@@ -32,7 +32,7 @@ function ArcGauge({ pct }: { pct: number }) {
         strokeLinecap="round"
         strokeDasharray={`${filled} ${circumference}`}
       />
-      <text x={cx} y={cy - 2} textAnchor="middle" fontSize="14" fontWeight="bold" fill={color} fontFamily="Playfair Display, serif">
+      <text x={cx} y={cy - 2} textAnchor="middle" fontSize="14" fontWeight="bold" fill={color} fontFamily="'DM Sans', sans-serif">
         {pct.toFixed(0)}%
       </text>
       <text x={cx} y={cy + 10} textAnchor="middle" fontSize="7" fill="#6B7280">
@@ -94,7 +94,7 @@ export default function CCHealthCard() {
               <ArcGauge pct={utilPct} />
             </div>
 
-            <p className="text-[28px] leading-none mb-1" style={{ fontFamily: 'var(--font-serif)', fontWeight: 800, color: 'var(--color-text)' }}>
+            <p className="text-[28px] leading-none mb-1" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--color-text)' }}>
               {formatINR(s.total_outstanding ?? 0)}
             </p>
             <p className="text-xs mb-4" style={{ color: 'var(--color-text-muted)' }}>
@@ -104,7 +104,7 @@ export default function CCHealthCard() {
             <div className="grid grid-cols-2 gap-3 mb-4">
               <div className="rounded-xl p-3" style={{ background: 'var(--color-surface-2)' }}>
                 <p className="text-xs mb-0.5" style={{ color: 'var(--color-text-muted)' }}>Min Due</p>
-                <p className="text-sm font-semibold" style={{ fontFamily: 'var(--font-serif)', color: 'var(--color-text)' }}>
+                <p className="text-sm font-semibold" style={{ fontFamily: "'DM Sans', sans-serif", color: 'var(--color-text)' }}>
                   {formatINR(s.minimum_due ?? 0)}
                 </p>
               </div>

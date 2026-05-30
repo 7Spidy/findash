@@ -42,7 +42,7 @@ export default function AccountBalanceCard() {
             <p className="text-sm font-medium mb-1" style={{ color: 'var(--color-text-muted)' }}>
               {stmt.account_label}
             </p>
-            <p className="text-[30px] leading-none mb-2" style={{ fontFamily: 'var(--font-serif)', fontWeight: 800, color: 'var(--color-text)' }}>
+            <p className="text-[30px] leading-none mb-2" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 800, letterSpacing: '-0.02em', color: 'var(--color-text)' }}>
               {formatINR(s.closing_balance ?? 0)}
             </p>
 
