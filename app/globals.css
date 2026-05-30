@@ -2,6 +2,29 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─── ₹ (U+20B9) for Playfair Display ────────────────────────────────────────
+   Google omits the rupee sign from the Playfair auto-subset. These self-hosted
+   faces supply ONLY U+20B9 (scoped via unicode-range) so the browser composes:
+   digits/letters from the full Playfair subset, ₹ from here. The unicode-range
+   is essential — without it these faces would claim every glyph and break the
+   numbers. */
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 700;
+  font-display: block;
+  src: url('/fonts/playfair-inr-700.ttf') format('truetype');
+  unicode-range: U+20B9;
+}
+@font-face {
+  font-family: 'Playfair Display';
+  font-style: normal;
+  font-weight: 800;
+  font-display: block;
+  src: url('/fonts/playfair-inr-800.ttf') format('truetype');
+  unicode-range: U+20B9;
+}
+
 /* ─── Design tokens ─────────────────────────────────────────────────────────*/
 :root {
   --color-bg:           #FAF8F3;
