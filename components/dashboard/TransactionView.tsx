@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react'
 import { motion } from 'framer-motion'
-import { Search, X } from 'lucide-react'
+import { Search, X, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react'
 import { useAppState } from '@/context/AppContext'
 import { formatINR, formatShortDate } from '@/lib/utils'
 
@@ -37,6 +37,9 @@ const ALL_CATEGORIES = [
   'Subscriptions', 'Utilities', 'Travel', 'Investments', 'Health', 'Others',
 ]
 
+type SortKey = 'txn_date' | 'merchant_name' | 'category' | 'amount'
+type SortDir = 'asc' | 'desc'
+
 interface TransactionViewProps {
   filterCategory?: string | null
   filterMonth?: string | null
@@ -47,6 +50,8 @@ export default function TransactionView({ filterCategory: externalCat, filterMon
   const { state } = useAppState()
   const [search, setSearch] = useState('')
   const [activeCat, setActiveCat] = useState<string | null>(externalCat ?? null)
+  const [sortKey, setSortKey] = useState<SortKey>('txn_date')
+  const [sortDir, setSortDir] = useState<SortDir>('desc')
 
   // Sync external filterCategory prop
   const effectiveCat = externalCat ?? activeCat
@@ -82,13 +87,38 @@ export default function TransactionView({ filterCategory: externalCat, filterMon
     })
   }, [allTxns, effectiveCat, filterMonth, search])
 
-  const sorted = useMemo(
-    () => [...filtered].sort((a, b) => (b.txn_date ?? '').localeCompare(a.txn_date ?? '')),
-    [filtered]
-  )
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      let cmp = 0
+      switch (sortKey) {
+        case 'txn_date':
+          cmp = (a.txn_date ?? '').localeCompare(b.txn_date ?? '')
+          break
+        case 'merchant_name':
+          cmp = (a.merchant_name || a.description).localeCompare(b.merchant_name || b.description)
+          break
+        case 'category':
+          cmp = a.category.localeCompare(b.category)
+          break
+        case 'amount':
+          cmp = a.amount - b.amount
+          break
+      }
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+  }, [filtered, sortKey, sortDir])
+
+  const handleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    } else {
+      setSortKey(key)
+      setSortDir(key === 'amount' ? 'desc' : 'asc')
+    }
+  }
 
   const toggleCat = (cat: string) => {
-    if (externalCat !== undefined) {
+    if (externalCat !== undefined && externalCat !== null) {
       onFilterClear?.()
     } else {
       setActiveCat((prev) => (prev === cat ? null : cat))
@@ -101,6 +131,13 @@ export default function TransactionView({ filterCategory: externalCat, filterMon
   }
 
   const totalShown = sorted.reduce((s, t) => s + (t.txn_type === 'debit' ? t.amount : 0), 0)
+
+  function SortIcon({ col }: { col: SortKey }) {
+    if (sortKey !== col) return <ChevronsUpDown size={11} style={{ opacity: 0.4 }} />
+    return sortDir === 'asc'
+      ? <ChevronUp size={11} />
+      : <ChevronDown size={11} />
+  }
 
   return (
     <motion.div
@@ -197,21 +234,26 @@ export default function TransactionView({ filterCategory: externalCat, filterMon
                   borderBottom: '1px solid var(--color-border)',
                 }}
               >
-                <th className="py-3 px-5 text-left text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>
-                  Date
-                </th>
-                <th className="py-3 px-4 text-left text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>
-                  Merchant
-                </th>
-                <th className="py-3 px-4 text-left text-xs font-medium" style={{ color: 'var(--color-text-muted)' }}>
-                  Category
-                </th>
-                <th
-                  className="py-3 px-5 text-right text-xs font-medium"
-                  style={{ color: 'var(--color-text-muted)' }}
-                >
-                  Amount
-                </th>
+                {(
+                  [
+                    { key: 'txn_date', label: 'Date', align: 'left', cls: 'py-3 px-5' },
+                    { key: 'merchant_name', label: 'Merchant', align: 'left', cls: 'py-3 px-4' },
+                    { key: 'category', label: 'Category', align: 'left', cls: 'py-3 px-4' },
+                    { key: 'amount', label: 'Amount', align: 'right', cls: 'py-3 px-5' },
+                  ] as { key: SortKey; label: string; align: string; cls: string }[]
+                ).map(({ key, label, align, cls }) => (
+                  <th
+                    key={key}
+                    className={`${cls} text-xs font-medium select-none cursor-pointer`}
+                    style={{ color: sortKey === key ? 'var(--color-accent)' : 'var(--color-text-muted)', textAlign: align as 'left' | 'right' }}
+                    onClick={() => handleSort(key)}
+                  >
+                    <span className={`inline-flex items-center gap-1 ${align === 'right' ? 'flex-row-reverse' : ''}`}>
+                      {label}
+                      <SortIcon col={key} />
+                    </span>
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>

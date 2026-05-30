@@ -388,8 +388,21 @@ export async function exportPDF(
 
     for (const ins of active) {
       const iColor = INSIGHT_COLORS[ins.insight_type] ?? C.accent
-      const bodyLines = doc.splitTextToSize(safe(ins.body), cW - 12)
-      const cardH = Math.max(16, 11 + bodyLines.length * 4.5)
+      const hasMeta = ins.related_amount > 0 || !!ins.related_merchant
+
+      // Accurate height: 8.5pt ≈ 3mm per line at 72dpi/25.4 scale
+      const LINE_H = 4.2          // mm per body line (8.5pt font)
+      const TITLE_H = 10          // top section: baseline at y+7 + 3mm gap
+      const BODY_TOP = 13         // body text starts at y+13
+      const META_H = hasMeta ? 6 : 0   // meta row height at bottom
+      const PAD_BOTTOM = 3        // breathing room after last text
+
+      doc.setFontSize(8.5)
+      doc.setFont('helvetica', 'normal')
+      const bodyLines = doc.splitTextToSize(safe(ins.body), cW - 16)
+      const bodyH = bodyLines.length * LINE_H
+
+      const cardH = BODY_TOP + bodyH + META_H + PAD_BOTTOM
       guard(cardH + 5)
 
       // Card background
@@ -413,13 +426,20 @@ export async function exportPDF(
       doc.setTextColor(...sevColor)
       doc.text(ins.severity.toUpperCase(), mg + cW - 4, y + 7, { align: 'right' })
 
+      // Divider under title
+      doc.setDrawColor(...C.border)
+      doc.setLineWidth(0.2)
+      doc.line(mg + 8, y + TITLE_H, mg + cW - 4, y + TITLE_H)
+
       // Body
       doc.setFontSize(8.5)
+      doc.setFont('helvetica', 'normal')
       doc.setTextColor(...C.text)
-      doc.text(bodyLines, mg + 8, y + 13)
+      doc.text(bodyLines, mg + 8, y + BODY_TOP)
 
-      // Related amount / merchant
-      if (ins.related_amount > 0 || ins.related_merchant) {
+      // Related amount / merchant (pinned below body with fixed gap)
+      if (hasMeta) {
+        const metaY = y + BODY_TOP + bodyH + 2
         doc.setFontSize(7.5)
         doc.setFont('helvetica', 'bold')
         doc.setTextColor(...C.muted)
@@ -427,7 +447,7 @@ export async function exportPDF(
           ins.related_amount > 0 ? amt(ins.related_amount) : '',
           ins.related_merchant ? safe(ins.related_merchant) : '',
         ].filter(Boolean).join('  ·  ')
-        if (meta) doc.text(meta, mg + 8, y + cardH - 3.5)
+        if (meta) doc.text(meta, mg + 8, metaY)
       }
 
       y += cardH + 4
