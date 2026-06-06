@@ -157,7 +157,7 @@ function AnalysingScreen() {
         while (next === prev) next = Math.floor(Math.random() * MONEY_QUOTES.length)
         return next
       })
-    }, 5000)
+    }, 10000)
     return () => clearInterval(id)
   }, [])
 
