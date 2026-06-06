@@ -134,7 +134,7 @@ const MONEY_QUOTES: string[] = [
 function AnalysingScreen() {
   const [progress, setProgress] = useState(0)
   const [stepIdx, setStepIdx] = useState(0)
-  const [quoteIdx] = useState(() => Math.floor(Math.random() * MONEY_QUOTES.length))
+  const [quoteIdx, setQuoteIdx] = useState(() => Math.floor(Math.random() * MONEY_QUOTES.length))
   const rafRef = useRef<number>(0)
 
   useEffect(() => {
@@ -148,6 +148,17 @@ function AnalysingScreen() {
     }
     rafRef.current = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setQuoteIdx((prev) => {
+        let next = Math.floor(Math.random() * MONEY_QUOTES.length)
+        while (next === prev) next = Math.floor(Math.random() * MONEY_QUOTES.length)
+        return next
+      })
+    }, 5000)
+    return () => clearInterval(id)
   }, [])
 
   return (
@@ -178,30 +189,37 @@ function AnalysingScreen() {
         <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', textAlign: 'center', marginBottom: 28 }}>
           {ANALYSIS_STEPS[stepIdx]}
         </div>
-        <div
-          style={{
-            padding: '18px 22px',
-            background: '#FFFFFF',
-            border: '1px solid #E6E0D4',
-            borderRadius: 12,
-            marginBottom: 20,
-            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
-          }}
-        >
-          <p
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={quoteIdx}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.4 }}
             style={{
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: 'italic',
-              fontSize: 14.5,
-              color: '#7B3F00',
-              textAlign: 'center',
-              lineHeight: 1.75,
-              margin: 0,
+              padding: '18px 22px',
+              background: '#FFFFFF',
+              border: '1px solid #E6E0D4',
+              borderRadius: 12,
+              marginBottom: 20,
+              boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
             }}
           >
-            &ldquo;{MONEY_QUOTES[quoteIdx]}&rdquo;
-          </p>
-        </div>
+            <p
+              style={{
+                fontFamily: "'Playfair Display', serif",
+                fontStyle: 'italic',
+                fontSize: 14.5,
+                color: '#7B3F00',
+                textAlign: 'center',
+                lineHeight: 1.75,
+                margin: 0,
+              }}
+            >
+              &ldquo;{MONEY_QUOTES[quoteIdx]}&rdquo;
+            </p>
+          </motion.div>
+        </AnimatePresence>
         <p style={{ fontSize: 11.5, color: '#B0A898', textAlign: 'center', lineHeight: 1.7, margin: 0 }}>
           Your PDF is parsed locally in your browser.<br />
           Extracted transaction text is sent to Claude AI for analysis — nothing is stored.
