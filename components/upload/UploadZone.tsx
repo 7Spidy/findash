@@ -88,11 +88,11 @@ function HowItWorksModal({ onClose }: { onClose: () => void }) {
   const steps = [
     {
       icon: '📄', num: '01', title: 'Upload your statement',
-      body: 'Drag and drop — or tap to browse — your PDF bank or credit card statement. Supports HDFC, ICICI, SBI, Axis, Kotak, and AMEX. Multiple files supported. Your PDF must not be password-protected.',
+      body: "Drag and drop — or tap to browse — your PDF bank or credit card statement. Supports HDFC, ICICI, SBI, Axis, Kotak, and AMEX. Password-protected PDFs are supported — you'll be prompted to enter the password.",
     },
     {
       icon: '🔒', num: '02', title: 'Instant local parsing',
-      body: 'Your PDF is parsed entirely inside your browser. No file is ever transmitted to any server. Your financial data stays on your device — we have zero access to it.',
+      body: 'Your PDF is parsed entirely inside your browser using pdfjs. The raw file never leaves your device — only the extracted transaction text is sent onward for analysis.',
     },
     {
       icon: '🤖', num: '03', title: 'AI-powered analysis',
@@ -146,7 +146,7 @@ function HowItWorksModal({ onClose }: { onClose: () => void }) {
 
 function PrivacyModal({ onClose }: { onClose: () => void }) {
   const items = [
-    { icon: '🔒', title: 'No server uploads — ever',   body: "Your PDFs are never transmitted to any server. All parsing happens locally in your browser. The file never leaves your device." },
+    { icon: '🔒', title: 'PDF never leaves your device', body: 'Your PDF is parsed entirely in your browser using pdfjs. The raw file is never transmitted to any server — only the extracted transaction text is sent to Claude AI for analysis.' },
     { icon: '🗑️', title: 'Zero data retention',       body: "We don't save, log, or retain any financial data. Close the tab and everything is gone. No database, no cloud storage." },
     { icon: '👤', title: 'No account required',        body: 'Zero sign-up, no email, no login. Open the page, upload your statement, get insights — no strings attached.' },
     { icon: '🤖', title: 'AI transparency',            body: 'Only anonymised transaction summaries — no account numbers, card numbers, or names — are sent to Claude AI for analysis.' },
@@ -212,6 +212,13 @@ export default function UploadZone() {
     update({ status: 'extracting' })
     try {
       const result = await extractPdfText(file, password)
+      if (result.isLikelyImageBased) {
+        update({
+          status: 'failed',
+          error: "This PDF appears to be image-based (scanned). Re-download directly from your bank's app or net banking portal to get a text-layer PDF.",
+        })
+        return
+      }
       update({ status: 'ready', pageCount: result.pageCount, extractedText: result.text, passwordUsed: result.passwordUsed })
     } catch (err) {
       if (err instanceof PasswordRequiredError) {
@@ -354,7 +361,7 @@ export default function UploadZone() {
           maxWidth: isMobile ? 340 : 500, lineHeight: 1.76,
           marginBottom: isMobile ? 24 : 34,
         }}>
-          Drop your Indian bank or credit card PDFs. AI-powered analysis — parsed privately in your browser, never uploaded anywhere.
+          Drop your Indian bank or credit card PDFs. Your PDF stays in your browser — extracted transaction data is analysed by Claude AI, nothing is stored.
         </p>
 
         {/* Drop zone */}
@@ -391,17 +398,6 @@ export default function UploadZone() {
               }
             </div>
           </div>
-        </div>
-
-        {/* Password warning */}
-        <div style={{
-          display: 'flex', alignItems: 'flex-start', gap: 6,
-          marginTop: 11, fontSize: 12, color: '#6B7280',
-          maxWidth: isMobile ? '100%' : 520,
-          textAlign: 'center', justifyContent: 'center',
-        }}>
-          <span style={{ flexShrink: 0 }}>⚠️</span>
-          <span>Statement must <strong style={{ color: '#0F172A' }}>not</strong> be password-protected — download directly from your bank&apos;s app.</span>
         </div>
 
         {/* Bank pills — desktop */}
@@ -511,7 +507,7 @@ export default function UploadZone() {
         ) : (
           <>
             {[
-              { icon: '🔒', title: 'Zero storage',    desc: 'Parsed in your browser'   },
+              { icon: '🔒', title: 'PDF stays local',  desc: 'Parsed in your browser'   },
               { icon: '⚡', title: 'Instant results',  desc: 'AI insights in seconds'  },
               { icon: '🤖', title: 'Claude AI',        desc: 'Smart pattern analysis'  },
               { icon: '🇮🇳', title: 'Indian banks',   desc: 'HDFC, ICICI, SBI & more' },

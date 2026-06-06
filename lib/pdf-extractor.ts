@@ -4,6 +4,9 @@ export interface ExtractionResult {
   text: string
   pageCount: number
   passwordUsed: boolean
+  /** True when the PDF appears to be a scanned image rather than text-layer.
+   *  Detected by averaging fewer than 80 characters per page after extraction. */
+  isLikelyImageBased: boolean
 }
 
 export class PasswordRequiredError extends Error {
@@ -47,9 +50,14 @@ export async function extractPdfText(
     pages.push(pageText)
   }
 
+  const text = pages.join('\n\n--- PAGE BREAK ---\n\n')
+  const avgCharsPerPage = pdf.numPages > 0 ? text.trim().length / pdf.numPages : 0
+  const isLikelyImageBased = pdf.numPages > 1 && avgCharsPerPage < 80
+
   return {
-    text: pages.join('\n\n--- PAGE BREAK ---\n\n'),
+    text,
     pageCount: pdf.numPages,
     passwordUsed: !!password,
+    isLikelyImageBased,
   }
 }

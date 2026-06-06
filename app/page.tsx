@@ -28,9 +28,113 @@ const ANALYSIS_STEPS = [
   'Almost ready…',
 ]
 
+const MONEY_QUOTES: string[] = [
+  "What you earn is just the start; what you save reveals the art.",
+  "A penny saved today keeps the creditors away.",
+  "Save a slice of every pie, and wealthy you shall be by-and-by.",
+  "Count your coins before they fly; what's spent is gone, what's saved will multiply.",
+  "Every rupee saved tonight works for you by morning light.",
+  "He who saves in sunny days weathers every stormy phase.",
+  "Small savings, often made, build the fortune that won't fade.",
+  "The frugal man grows richer than the lavish, if he can.",
+  "Save not what is left after spending, but spend what is left after saving.",
+  "Fill the purse before the plate, and your future won't be late.",
+  "Spend with intent, and wealth is lent back to you by time well spent.",
+  "Money made in haste is often money laid to waste.",
+  "He who spends first will save last — if at all.",
+  "Don't pay for today with tomorrow's peace.",
+  "Every impulse buy is a quiet tax on your future self.",
+  "Debt is a weight that grows by night; savings are a morning light.",
+  "A loan in hand may feel like gold, but interest makes the price unfold.",
+  "He who avoids debt avoids the chains that follow.",
+  "A rupee of debt costs more than a rupee of savings earns.",
+  "Borrow with a plan, or not at all; debt without purpose makes you fall.",
+  "The coin you keep will grow and leap; compound is a secret deep.",
+  "Time in the market beats timing the market.",
+  "The market dips, the market soars; patience always opens doors.",
+  "Markets test your faith before they reward your patience.",
+  "Gold is found by those who learn to let their savings slowly turn.",
+  "Invest in boring things; excitement is reserved for casinos.",
+  "The market rewards patience far more than it rewards genius.",
+  "Opportunity knocks once; compound interest knocks daily.",
+  "Plant your money like a seed; tend it well to meet your need.",
+  "A patient investor's garden grows when others fear to sow.",
+  "A budget is a map to where you want to be; spend without one and you'll never see.",
+  "He who budgets never grudges.",
+  "Track every rupee, for in tracking lies the mastery.",
+  "A planned expense is a managed one; an impulse is a regret in waiting.",
+  "Know where your money sleeps, lest it wander into someone else's dream.",
+  "A leak in your wallet can sink the ship of wealth.",
+  "Don't let your lifestyle inflate faster than your income dictates.",
+  "Know your expenses like you know your friends — intimately.",
+  "A financial goal without a plan is just a wish in the wind.",
+  "The humble spender often outlasts the lavish earner.",
+  "Rich is not who earns the most, but who wastes the least to boast.",
+  "Wealth is less about the earning and more about the learning.",
+  "Money is a river — direct its flow, or it will carve its own.",
+  "Contentment is the greatest wealth; desire, the deepest poverty.",
+  "The wealthiest person is not who has the most, but who needs the least.",
+  "Security comes not from earning more, but from needing less.",
+  "The greatest luxury is not needing luxury.",
+  "Financial peace is not about the amount, but the arrangement.",
+  "Wealth whispers; debt shouts.",
+  "Comfort with less is a kind of abundance.",
+  "He who understands compound interest earns it; he who doesn't pays it.",
+  "Good money habits compound like interest — silently, then suddenly.",
+  "Invest in your future self; she'll thank you most generously.",
+  "Every rupee managed wisely is worth ten earned carelessly.",
+  "A rupee today that compounds away is worth far more than what you say.",
+  "Money unspent is freedom unspent.",
+  "The price of financial freedom is paid in small daily choices.",
+  "Financial freedom is bought one decision at a time.",
+  "One who controls their spending controls their destiny.",
+  "Pay yourself first; the rest will sort itself.",
+  "The richest version of you is built by thousands of small choices.",
+  "The best time to save was yesterday; the next best time is today.",
+  "Time and money, both are rare; invest them both with greatest care.",
+  "Wealth is not rushed; it is tended through the years unhushed.",
+  "Slow money made honestly outlasts fast money made rashly.",
+  "Start investing early, stay investing long — that is the investor's song.",
+  "Buy what depreciates with care; invest in what appreciates with flair.",
+  "Your income matters far less than your net position.",
+  "Diversify your holdings like you diversify your meals.",
+  "Avoid spending to impress those who spend to impress you.",
+  "The habit of saving is itself an education worth having.",
+  "Your spending habits are your autobiography written in numbers.",
+  "The scoreboard of wealth is printed on statements, not social feeds.",
+  "Build systems, not wishes; wealth follows process, not just riches.",
+  "Financial clarity begins where denial ends.",
+  "Every subscription reviewed is a choice actively renewed.",
+  "Invest in knowledge first; it quenches every financial thirst.",
+  "Fortune favours the one who plans before the rain.",
+  "The rich invest time; the poor spend time. Both spend money.",
+  "Frugality is not poverty; it is wisdom dressed humbly.",
+  "The path to wealth is paved with consistent, boring decisions.",
+  "Not all who wander in markets are lost — some are simply invested.",
+  "Simplicity in spending is sophistication in planning.",
+  "Financial health is not a destination, it's a daily direction.",
+  "Money is a tool; wealth is the mindset that shapes how it's used.",
+  "The surest path to wealth passes through discipline's gate.",
+  "A pot saved drop by drop is the one that never stops.",
+  "He who counts what goes out never runs out.",
+  "In markets wild and markets tame, consistency will win the game.",
+  "Don't count the coins you've spent with pride; count the ones working inside.",
+  "Your net worth is the story your numbers tell of priorities well.",
+  "Financial independence is the quiet revolution of the disciplined.",
+  "Wealth is the residue of habit, not of luck.",
+  "The best returns are earned in turns of patience and of discipline.",
+  "Every statement reviewed is a step toward the life you've pursued.",
+  "Know your numbers, know yourself; financial health is your true wealth.",
+  "The numbers don't lie, but they do whisper — learn to listen.",
+  "A clear view of spending is the beginning of your ascending.",
+  "What gets measured gets managed, and managed wealth expands.",
+  "Spend less than you earn, invest the rest, and time will do the rest.",
+]
+
 function AnalysingScreen() {
   const [progress, setProgress] = useState(0)
   const [stepIdx, setStepIdx] = useState(0)
+  const [quoteIdx] = useState(() => Math.floor(Math.random() * MONEY_QUOTES.length))
   const rafRef = useRef<number>(0)
 
   useEffect(() => {
@@ -71,11 +175,36 @@ function AnalysingScreen() {
             }}
           />
         </div>
-        <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', textAlign: 'center', marginBottom: 10 }}>
+        <div style={{ fontSize: 15, fontWeight: 600, color: '#0F172A', textAlign: 'center', marginBottom: 28 }}>
           {ANALYSIS_STEPS[stepIdx]}
         </div>
-        <p style={{ fontSize: 12.5, color: '#9CA3AF', textAlign: 'center', lineHeight: 1.7, margin: 0 }}>
-          Your data is processed entirely in your browser.<br />Nothing is sent to any server.
+        <div
+          style={{
+            padding: '18px 22px',
+            background: '#FFFFFF',
+            border: '1px solid #E6E0D4',
+            borderRadius: 12,
+            marginBottom: 20,
+            boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+          }}
+        >
+          <p
+            style={{
+              fontFamily: "'Playfair Display', serif",
+              fontStyle: 'italic',
+              fontSize: 14.5,
+              color: '#7B3F00',
+              textAlign: 'center',
+              lineHeight: 1.75,
+              margin: 0,
+            }}
+          >
+            &ldquo;{MONEY_QUOTES[quoteIdx]}&rdquo;
+          </p>
+        </div>
+        <p style={{ fontSize: 11.5, color: '#B0A898', textAlign: 'center', lineHeight: 1.7, margin: 0 }}>
+          Your PDF is parsed locally in your browser.<br />
+          Extracted transaction text is sent to Claude AI for analysis — nothing is stored.
         </p>
       </div>
     </div>

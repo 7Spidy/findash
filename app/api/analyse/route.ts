@@ -263,11 +263,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No statements provided' }, { status: 400 })
     }
 
-    const parsed_statements: ParsedStatement[] = []
-    for (const stmt of statements) {
-      const parsed = await parseStatement(stmt)
-      parsed_statements.push(parsed)
-    }
+    // Parse all statements in parallel — significantly faster for multi-file uploads
+    const parsed_statements = await Promise.all(statements.map(parseStatement))
 
     const insights = await generateInsights(parsed_statements)
 
